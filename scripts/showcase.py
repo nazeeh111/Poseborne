@@ -76,6 +76,11 @@ def signal_trace():
     return tensor, means, energies, mask, starts, X, valid, metrics
 
 
+def frame_sample(index, count=64):
+    """The source timestamp shown by a frame, independent of playback duration."""
+    return 5 * int(round((5 + index * 395 / (count - 1)) / 5))
+
+
 def render_frames(trace, *, font_path=None):
     import numpy as np
     from PIL import Image, ImageDraw, ImageFont
@@ -94,7 +99,7 @@ def render_frames(trace, *, font_path=None):
         return Image.fromarray(np.uint8(np.clip(c, 0, 255)), "RGB")
     frames = []
     for n in range(64):
-        sample = 5 * int(round((5 + n * 395 / 63) / 5))
+        sample = frame_sample(n)
         im = Image.new("RGB", (w, h), navy)
         d = ImageDraw.Draw(im)
         def txt(x, y, text, size=17, fill=ink):
@@ -178,11 +183,18 @@ def main(argv=None):
     # Use a single palette to prevent GIF frame-to-frame color flicker.
     palette = frames[24].quantize(colors=128)
     indexed = [im.quantize(palette=palette, dither=Image.Dither.NONE) for im in frames]
+    rejected_frames = [n for n in range(len(frames))
+                       if not trace[6][frame_sample(n, len(frames)) // 5 - 1]]
+    durations = [900 if n in rejected_frames else 70 for n in range(len(frames))]
     indexed[0].save(args.out / "signal-path.gif", save_all=True, append_images=indexed[1:],
-                    duration=70, loop=0, optimize=True, disposal=1)
+                    duration=durations, loop=0, optimize=True, disposal=1)
     frames[28].save(args.out / "signal-path.png")
     metrics = trace[-1]
-    metrics["animation"] = {"frames": len(frames), "frame_duration_ms": 70, "size": list(frames[0].size)}
+    metrics["animation"] = {"frames": len(frames), "frame_duration_ms": durations,
+                            "rejected_frame_hold_ms": 900,
+                            "rejected_frame_indices": rejected_frames,
+                            "playback_duration_ms": sum(durations),
+                            "size": list(frames[0].size)}
     (args.out / "signal-path.json").write_text(json.dumps(metrics, indent=2) + "\n", encoding="utf-8")
     print(f"{metrics['valid_windows']}/{metrics['windows']} windows accepted; "
           f"{metrics['rejected_windows']} rejected. Synthetic input, no pose inference.\n{args.out}")

@@ -9,7 +9,7 @@ python wipose.py showcase --out signal-demo
 
 The output directory must be new. It contains:
 
-- `signal-path.gif`: 64 frames, 1120 × 660 pixels, 70 ms per frame, looping.
+- `signal-path.gif`: 64 frames, 1120 × 660 pixels, looping. Ordinary frames last 70 ms; the rejected window is held for 900 ms so the missing-data gate is readable.
 - `signal-path.png`: still view for reduced motion and image previews.
 - `signal-path.json`: seed, numerical-input/window hashes, links, dimensions and rejection counts.
 
@@ -24,7 +24,7 @@ The default Pillow font works across platforms. An optional local `--font /path/
 5. `csi_rt.presence.MotionEnergy` computes the mean of per-link amplitude-mean standard deviations over its trailing half-second history. This is model-free signal variability; it is not a presence or pose prediction.
 6. Pillow draws the resulting arrays and gate state. The inference stage remains visually inactive, labeled “trained weights required.”
 
-The trace is an offline walkthrough. The cursor marks the end of the displayed five-sample window; the entire four-second input is visible for context. The GIF's playback time is a presentation choice, not a processing-throughput benchmark.
+The trace is an offline walkthrough. The cursor marks the end of the displayed five-sample window; the entire four-second input is visible for context. Playback pauses on the actual rejected window at source time **1.85 s**, without changing its data or cursor, then continues. The numerical record lists each frame's playback duration; the loop takes 5.31 seconds. Playback timing is a presentation choice, not a processing-throughput benchmark.
 
 ## Verify it
 
