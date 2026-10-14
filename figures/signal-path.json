@@ -1,0 +1,99 @@
+{
+  "kind": "synthetic signal walkthrough",
+  "seed": 20261014,
+  "duration_s": 4,
+  "grid_hz": 100,
+  "links": [
+    {
+      "rx": 0,
+      "tx": 0,
+      "packets": 401,
+      "breaks": []
+    },
+    {
+      "rx": 0,
+      "tx": 1,
+      "packets": 401,
+      "breaks": []
+    },
+    {
+      "rx": 0,
+      "tx": 2,
+      "packets": 401,
+      "breaks": []
+    },
+    {
+      "rx": 1,
+      "tx": 0,
+      "packets": 401,
+      "breaks": []
+    },
+    {
+      "rx": 1,
+      "tx": 1,
+      "packets": 401,
+      "breaks": []
+    },
+    {
+      "rx": 1,
+      "tx": 2,
+      "packets": 401,
+      "breaks": []
+    },
+    {
+      "rx": 2,
+      "tx": 0,
+      "packets": 401,
+      "breaks": []
+    },
+    {
+      "rx": 2,
+      "tx": 1,
+      "packets": 401,
+      "breaks": []
+    },
+    {
+      "rx": 2,
+      "tx": 2,
+      "packets": 395,
+      "breaks": [
+        [
+          1790000000,
+          1860000000
+        ]
+      ]
+    }
+  ],
+  "input_iq_sha256": "92c917adf1e21d0d5f2858c03a78dd6c79ba69ad979e3443accc0356fa2044bb",
+  "windows": 80,
+  "valid_windows": 79,
+  "rejected_windows": 1,
+  "window_shape": [
+    280,
+    3,
+    3
+  ],
+  "window_dtype": "float16",
+  "window_sha256": "2f7547b5a064443c4d5e5d7fee9f408291c6a7b181c4069caf50111c6ee41e54",
+  "motion_energy_range": [
+    0.0,
+    4.723101582558147
+  ],
+  "pose_inference": false,
+  "hardware_measurement": false,
+  "routines": [
+    "csi_pipe.align.amplitude",
+    "csi_pipe.align.fill_gaps",
+    "csi_pipe.align.grid_block",
+    "csi_pipe.align.cut_windows",
+    "csi_rt.presence.MotionEnergy"
+  ],
+  "animation": {
+    "frames": 64,
+    "frame_duration_ms": 70,
+    "size": [
+      1120,
+      660
+    ]
+  }
+}

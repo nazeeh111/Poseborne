@@ -44,3 +44,4 @@ Thumbs.db
 .verification/
 __pycache__/
 *.pyc
+showcase-output/
