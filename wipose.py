@@ -4,7 +4,7 @@ from pathlib import Path
 import subprocess
 import sys
 
-COMMANDS = {'train': 'train/train.py', 'infer': 'rt/demo.py', 'label': 'teacher/teacher.py', 'probe': 'train/probe.py'}
+COMMANDS = {'showcase': 'scripts/showcase.py', 'train': 'train/train.py', 'infer': 'rt/demo.py', 'label': 'teacher/teacher.py', 'probe': 'train/probe.py'}
 
 
 def main(argv=None):

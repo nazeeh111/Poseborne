@@ -1,0 +1,44 @@
+name: Signal walkthrough
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  showcase:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - name: Install lightweight demo dependencies
+        run: python -m pip install -r requirements-showcase.txt
+      - name: Check transforms and command dispatch
+        run: python -m unittest discover -s tests -v
+      - name: Render through the public command with the portable font
+        run: python wipose.py showcase --out showcase-ci
+      - name: Check exported animation and evidence
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from PIL import Image
+          output = Path('showcase-ci')
+          record = json.loads((output / 'signal-path.json').read_text())
+          assert record['windows'] == record['valid_windows'] + record['rejected_windows']
+          assert record['rejected_windows'] > 0
+          assert record['pose_inference'] is False and record['hardware_measurement'] is False
+          with Image.open(output / 'signal-path.gif') as animation:
+              assert animation.n_frames == record['animation']['frames']
+              for index in range(animation.n_frames):
+                  animation.seek(index)
+                  animation.load()
+          PY
