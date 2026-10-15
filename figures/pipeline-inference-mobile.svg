@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 980" role="img" aria-labelledby="title desc">
+<title id="title">Inference + invalid windows</title><desc id="desc">Live or recorded CSI enters a ring buffer and validity gate. Valid windows use per-link L2 and stored normalization, then the checkpoint-loaded WiSPPN model, presence gating, smoothing and experimental fall rules. Invalid windows increment the drop count and retain the previous displayed pose and state.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10" fill="#1558d6"/></marker></defs>
+<rect width="420" height="980" fill="#ffffff" stroke="#c9cfd6"/>
+<g font-family="Arial, Helvetica, sans-serif">
+<text x="24" y="35" font-size="23" font-weight="700" fill="#20252b">Inference + invalid windows</text>
+<rect x="24" y="64" width="372" height="76" rx="4" fill="#ffffff" stroke="#abb3bf"/>
+<text x="38" y="92" font-size="19" font-weight="700" fill="#20252b">Live or recorded CSI</text>
+<text x="38" y="116" font-size="15" font-weight="400" fill="#58616c">Incoming link packets</text>
+<rect x="24" y="170" width="372" height="76" rx="4" fill="#ffffff" stroke="#abb3bf"/>
+<text x="38" y="198" font-size="19" font-weight="700" fill="#20252b">Ring buffer</text>
+<text x="38" y="222" font-size="15" font-weight="400" fill="#58616c">Build window + validity</text>
+<rect x="24" y="276" width="372" height="76" rx="4" fill="#eef4ff" stroke="#1558d6"/>
+<text x="38" y="304" font-size="19" font-weight="700" fill="#20252b">Valid window?</text>
+<text x="38" y="328" font-size="15" font-weight="400" fill="#58616c">Check missing-data mask</text>
+<path d="M210 142 V168" fill="none" stroke="#1558d6" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M210 248 V274" fill="none" stroke="#1558d6" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="88" y="382" font-size="14" font-weight="700" fill="#1558d6">YES</text>
+<text x="284" y="382" font-size="14" font-weight="700" fill="#1558d6">NO</text>
+<path d="M112 354 V398" fill="none" stroke="#1558d6" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M308 354 V398" fill="none" stroke="#1558d6" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="24" y="400" width="176" height="108" rx="4" fill="#ffffff" stroke="#abb3bf"/>
+<text x="38" y="428" font-size="18" font-weight="700" fill="#20252b">Normalize</text>
+<text x="38" y="452" font-size="15" font-weight="400" fill="#58616c">Per-link L2</text>
+<text x="38" y="472" font-size="15" font-weight="400" fill="#58616c">Checkpoint statistics</text>
+<rect x="220" y="400" width="176" height="108" rx="4" fill="#ffffff" stroke="#abb3bf"/>
+<text x="234" y="428" font-size="18" font-weight="700" fill="#20252b">Hold display</text>
+<text x="234" y="452" font-size="15" font-weight="400" fill="#58616c">Count one drop</text>
+<text x="234" y="472" font-size="15" font-weight="400" fill="#58616c">Keep previous</text>
+<text x="234" y="492" font-size="15" font-weight="400" fill="#58616c">pose and state</text>
+<rect x="24" y="560" width="290" height="76" rx="4" fill="#ffffff" stroke="#abb3bf"/>
+<text x="38" y="588" font-size="17" font-weight="700" fill="#20252b">WiSPPN + trained weights</text>
+<text x="38" y="612" font-size="15" font-weight="400" fill="#58616c">18 joints + confidence</text>
+<rect x="24" y="666" width="290" height="76" rx="4" fill="#ffffff" stroke="#abb3bf"/>
+<text x="38" y="694" font-size="17" font-weight="700" fill="#20252b">Presence gate + smoothing</text>
+<text x="38" y="718" font-size="15" font-weight="400" fill="#58616c">Filter and stabilize pose</text>
+<rect x="24" y="772" width="290" height="76" rx="4" fill="#ffffff" stroke="#abb3bf"/>
+<text x="38" y="800" font-size="17" font-weight="700" fill="#20252b">Experimental fall rules</text>
+<text x="38" y="824" font-size="15" font-weight="400" fill="#58616c">Update the rule-based state</text>
+<path d="M112 510 V538 H169 V558" fill="none" stroke="#1558d6" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M169 638 V664" fill="none" stroke="#1558d6" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M169 744 V770" fill="none" stroke="#1558d6" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="24" y="878" width="372" height="76" rx="4" fill="#ffffff" stroke="#abb3bf"/>
+<text x="38" y="906" font-size="19" font-weight="700" fill="#20252b">Render pose + state</text>
+<text x="38" y="930" font-size="15" font-weight="400" fill="#58616c">May retain the previous estimate</text>
+<path d="M169 850 V876" fill="none" stroke="#1558d6" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M308 510 V538 H408 V916 H398" fill="none" stroke="#1558d6" stroke-width="2" marker-end="url(#arrow)"/>
+</g></svg>

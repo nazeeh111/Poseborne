@@ -1,12 +1,22 @@
 # Follow the WiPose pipeline
 
-The overview describes implemented dependencies. It does not establish successful hardware operation or pose accuracy. The [verification record](VERIFICATION.md) separates executed checks from retained research results.
+Trace the implemented capture, training and inference paths to their source. The [verification record](VERIFICATION.md) distinguishes executed checks from retained research results.
 
 [Runnable walkthrough](../README.md#run-the-signal-walkthrough) · [Hardware setup](REFERENCE.md#hardware-requirements) · [Research reference](REFERENCE.md)
 
 ## Capture and sample construction
 
-```mermaid
+<a href="../figures/pipeline-capture.svg">
+<picture>
+  <source media="(max-width: 600px)" srcset="../figures/pipeline-capture-mobile.svg">
+  <img src="../figures/pipeline-capture.svg" alt="Capture and offline sample construction, from six radios through recorded sessions and aligned feature windows.">
+</picture>
+</a>
+
+<details>
+<summary>Editable flow source</summary>
+
+```text
 flowchart TD
     classDef default fill:#ffffff,stroke:#747a7e,color:#20272d
     linkStyle default stroke:#20272d
@@ -19,6 +29,8 @@ flowchart TD
     Mask --> Grid[Corrected 100 Hz grid]
     Grid --> Windows[Five-sample feature windows and validity]
 ```
+
+</details>
 
 The default amplitude route combines **five time samples × 56 carriers × nine radio links** into a `float16` tensor shaped **`(280, 3, 3)`**. The last two axes index receiver and transmitter. A short sequence gap of at most two samples can be interpolated, and its provenance stays in the mask. Longer gaps remain breaks. The window gate rejects a window when any link has at least two masked slots among its five samples. The synthetic walkthrough deliberately exercises a six-packet gap.
 
@@ -35,7 +47,17 @@ The guide shows the offline sample path. Live inference uses its own [ring buffe
 
 ## Training: where the checkpoint comes from
 
-```mermaid
+<a href="../figures/pipeline-training.svg">
+<picture>
+  <source media="(max-width: 600px)" srcset="../figures/pipeline-training-mobile.svg">
+  <img src="../figures/pipeline-training.svg" alt="Camera teacher labels join recorded CSI windows to train a saved checkpoint.">
+</picture>
+</a>
+
+<details>
+<summary>Editable flow source</summary>
+
+```text
 flowchart TD
     classDef default fill:#ffffff,stroke:#747a7e,color:#20272d
     linkStyle default stroke:#20272d
@@ -48,7 +70,9 @@ flowchart TD
     Fit --> Checkpoint[Checkpoint: weights, configuration, statistics]
 ```
 
-The camera is a training-label source. It does not turn the no-hardware walkthrough into a pose demonstration. Teacher labeling runs third-party ONNX models and can download those models when invoked. Label generation, pairing and training need appropriate recordings and configuration; the README does not supply a trained checkpoint.
+</details>
+
+The camera supplies training labels through third-party ONNX models, downloaded when teacher labeling runs. Training needs synchronized recordings and configuration; no trained checkpoint is bundled.
 
 The model maps CSI features into a pose representation. Its default pose adjacency matrix (PAM) has shape `(3, 18, 18)`; inference extracts the diagonal to obtain 18 joint coordinates and a per-joint confidence channel. An optional vector head outputs `(3, 18)` directly. The confidence channel is a model output, not a calibrated probability of correctness.
 
@@ -64,7 +88,17 @@ The model maps CSI features into a pose representation. Its default pose adjacen
 
 ## Inference and replay
 
-```mermaid
+<a href="../figures/pipeline-inference.svg">
+<picture>
+  <source media="(max-width: 600px)" srcset="../figures/pipeline-inference-mobile.svg">
+  <img src="../figures/pipeline-inference.svg" alt="Valid windows run checkpoint-loaded inference. Invalid windows retain the prior displayed pose and state.">
+</picture>
+</a>
+
+<details>
+<summary>Editable flow source</summary>
+
+```text
 flowchart TD
     classDef default fill:#ffffff,stroke:#747a7e,color:#20272d
     linkStyle default stroke:#20272d
@@ -80,6 +114,8 @@ flowchart TD
     Hold --> Display
 ```
 
+</details>
+
 [PoseEstimator](../rt/csi_rt/infer.py) loads the checkpoint, checks the channel convention, applies per-link L2 normalization followed by the saved mean and scale, and runs the model. Its coordinate output is `(18, 2)`, with a separate `(18,)` confidence array. A camera is not required as model input; optional synchronized video can be used as the display background.
 
 [Engine.tick](../rt/demo.py) runs the estimator only on a valid window. It applies the [presence gate](../rt/csi_rt/presence.py), [smoother](../rt/csi_rt/smooth.py) and [fall rules](../rt/csi_rt/fall.py). On an invalid window it increments the drop counter and retains the previous displayed pose/state. A visible skeleton can therefore be stale; it is not evidence that every window yielded a new estimate. Motion energy is a separate model-free variability measure used by the fall rules and display; it is not itself a pose or human-presence estimate.
@@ -88,6 +124,6 @@ The scheduled window boundary is 50 ms. That describes the pipeline's time grid,
 
 ## Reading the demonstrations
 
-The [signal walkthrough](SHOWCASE.md) runs the real amplitude, alignment, mask, window and motion-energy functions on deterministic synthetic samples. Its diagrammed model stage stays inactive. The [original research recording](REFERENCE.md#what-it-detects) shows a separate source-reported full-system run. Neither the overview nor the new documentation adds hardware validation, cross-room accuracy or a fall-safety guarantee.
+The [signal walkthrough](SHOWCASE.md) executes preprocessing on synthetic samples and stops before pose inference. The [original research recording](REFERENCE.md#what-it-detects) shows the source-reported full system. See [evidence and limits](../README.md#evidence-and-limits) before interpreting either demonstration.
 
-The original overview artwork is generated by `python scripts/presentation.py`, using only the standard library. Edit that generator and regenerate both desktop and narrow-screen SVGs together. The flowcharts above use Mermaid, GitHub's text-based diagram renderer. Keep their nodes and arrows tied to the linked code when the implementation changes.
+The [scientific overview](../scripts/system_figure.py) and [guide layouts](../scripts/presentation.py) are original vector sources. Run `python scripts/presentation.py` to regenerate their desktop and narrow-screen SVGs with the standard library. The README uses 2× PNG exports of the scientific figure to preserve its DIN Alternate and Avenir Next typography without redistributing font files. Collapsed text retains each guide diagram’s flow relationships; keep artwork tied to the linked implementation.

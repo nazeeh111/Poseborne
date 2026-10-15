@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 470" role="img" aria-labelledby="title desc">
+<title id="title">Capture → feature windows</title><desc id="desc">Three transmitters send ESP-NOW beacons to three receivers. Serial CSI frames enter the host bridge, which saves raw logs and publishes MQTT. Recorded HDF5 sessions undergo clock fitting, epoch separation, amplitude processing, gap masking, gridding and five-sample window construction.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10" fill="#1558d6"/></marker></defs>
+<rect width="1120" height="470" fill="#ffffff" stroke="#c9cfd6"/>
+<g font-family="Arial, Helvetica, sans-serif">
+<text x="24" y="35" font-size="23" font-weight="700" fill="#20252b">Capture → feature windows</text>
+<rect x="32" y="80" width="186" height="100" rx="4" fill="#ffffff" stroke="#abb3bf"/>
+<text x="46" y="108" font-size="18" font-weight="700" fill="#20252b">3 transmitters</text>
+<text x="46" y="132" font-size="15" font-weight="400" fill="#58616c">ESP32-S3 / ESP-NOW</text>
+<rect x="322" y="80" width="186" height="100" rx="4" fill="#ffffff" stroke="#abb3bf"/>
+<text x="336" y="108" font-size="18" font-weight="700" fill="#20252b">3 receivers</text>
+<text x="336" y="132" font-size="15" font-weight="400" fill="#58616c">CSI frames over serial</text>
+<rect x="612" y="80" width="186" height="100" rx="4" fill="#ffffff" stroke="#abb3bf"/>
+<text x="626" y="108" font-size="18" font-weight="700" fill="#20252b">Host bridge</text>
+<text x="626" y="132" font-size="15" font-weight="400" fill="#58616c">Timestamp + frame</text>
+<text x="626" y="152" font-size="15" font-weight="400" fill="#58616c">Publish MQTT</text>
+<rect x="902" y="80" width="186" height="100" rx="4" fill="#ffffff" stroke="#abb3bf"/>
+<text x="916" y="108" font-size="18" font-weight="700" fill="#20252b">Raw logs</text>
+<text x="916" y="132" font-size="15" font-weight="400" fill="#58616c">Preserved capture</text>
+<path d="M220 130 H320" fill="none" stroke="#1558d6" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M510 130 H610" fill="none" stroke="#1558d6" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M800 130 H900" fill="none" stroke="#1558d6" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="228" y="113" font-size="14" font-weight="400" fill="#58616c">beacons</text>
+<text x="518" y="113" font-size="14" font-weight="400" fill="#58616c">CSI</text>
+<path d="M705 182 V242 H16 V365 H30" fill="none" stroke="#1558d6" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="718" y="218" font-size="14" font-weight="400" fill="#58616c">MQTT</text>
+<text x="32" y="285" font-size="13" font-weight="700" fill="#1558d6">OFFLINE SAMPLE CONSTRUCTION</text>
+<rect x="32" y="320" width="192" height="90" rx="4" fill="#ffffff" stroke="#abb3bf"/>
+<text x="46" y="348" font-size="17" font-weight="700" fill="#20252b">HDF5 session</text>
+<text x="46" y="372" font-size="15" font-weight="400" fill="#58616c">Recorded link data</text>
+<path d="M226 365 H246" fill="none" stroke="#1558d6" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="248" y="320" width="192" height="90" rx="4" fill="#ffffff" stroke="#abb3bf"/>
+<text x="262" y="348" font-size="17" font-weight="700" fill="#20252b">Clock + epochs</text>
+<text x="262" y="372" font-size="15" font-weight="400" fill="#58616c">Fit board → host time</text>
+<path d="M442 365 H462" fill="none" stroke="#1558d6" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="464" y="320" width="192" height="90" rx="4" fill="#ffffff" stroke="#abb3bf"/>
+<text x="478" y="348" font-size="17" font-weight="700" fill="#20252b">Amplitude + mask</text>
+<text x="478" y="372" font-size="15" font-weight="400" fill="#58616c">Fill short gaps only</text>
+<path d="M658 365 H678" fill="none" stroke="#1558d6" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="680" y="320" width="192" height="90" rx="4" fill="#ffffff" stroke="#abb3bf"/>
+<text x="694" y="348" font-size="17" font-weight="700" fill="#20252b">100 Hz grid</text>
+<text x="694" y="372" font-size="15" font-weight="400" fill="#58616c">Corrected common time</text>
+<path d="M874 365 H894" fill="none" stroke="#1558d6" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="896" y="320" width="192" height="90" rx="4" fill="#ffffff" stroke="#abb3bf"/>
+<text x="910" y="348" font-size="17" font-weight="700" fill="#20252b">Feature windows</text>
+<text x="910" y="372" font-size="15" font-weight="400" fill="#58616c">5 samples + validity</text>
+<text x="32" y="448" font-size="17" font-weight="400" fill="#58616c">Default window: 5 samples × 56 carriers × 9 links → float16 (280, 3, 3)</text>
+</g></svg>

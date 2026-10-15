@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 454" role="img" aria-labelledby="title desc">
+<title id="title">Training → checkpoint</title><desc id="desc">Synchronized camera video passes through RTMDet and RTMPose to produce 18-joint labels. Recorded CSI becomes aligned windows. Timestamp joining, label QA and presence targets produce pairs for normalization and pose-regression training, which saves weights, configuration and statistics in a checkpoint.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10" fill="#1558d6"/></marker></defs>
+<rect width="1120" height="454" fill="#ffffff" stroke="#c9cfd6"/>
+<g font-family="Arial, Helvetica, sans-serif">
+<text x="24" y="35" font-size="23" font-weight="700" fill="#20252b">Training → checkpoint</text>
+<rect x="32" y="80" width="236" height="100" rx="4" fill="#ffffff" stroke="#abb3bf"/>
+<text x="46" y="108" font-size="18" font-weight="700" fill="#20252b">Camera recording</text>
+<text x="46" y="132" font-size="15" font-weight="400" fill="#58616c">Synchronized video</text>
+<rect x="316" y="80" width="236" height="100" rx="4" fill="#ffffff" stroke="#abb3bf"/>
+<text x="330" y="108" font-size="18" font-weight="700" fill="#20252b">RTMDet → RTMPose</text>
+<text x="330" y="132" font-size="15" font-weight="400" fill="#58616c">Teacher labeling</text>
+<rect x="600" y="80" width="236" height="100" rx="4" fill="#ffffff" stroke="#abb3bf"/>
+<text x="614" y="108" font-size="18" font-weight="700" fill="#20252b">18-joint labels</text>
+<text x="614" y="132" font-size="15" font-weight="400" fill="#58616c">Training targets</text>
+<rect x="884" y="80" width="204" height="100" rx="4" fill="#ffffff" stroke="#abb3bf"/>
+<text x="898" y="108" font-size="18" font-weight="700" fill="#20252b">Checkpoint</text>
+<text x="898" y="132" font-size="15" font-weight="400" fill="#58616c">Weights + config</text>
+<text x="898" y="152" font-size="15" font-weight="400" fill="#58616c">Saved statistics</text>
+<rect x="32" y="280" width="236" height="100" rx="4" fill="#ffffff" stroke="#abb3bf"/>
+<text x="46" y="308" font-size="18" font-weight="700" fill="#20252b">Recorded CSI</text>
+<text x="46" y="332" font-size="15" font-weight="400" fill="#58616c">Session link data</text>
+<rect x="316" y="280" width="236" height="100" rx="4" fill="#ffffff" stroke="#abb3bf"/>
+<text x="330" y="308" font-size="18" font-weight="700" fill="#20252b">Aligned windows</text>
+<text x="330" y="332" font-size="15" font-weight="400" fill="#58616c">Same time base as video</text>
+<rect x="600" y="280" width="236" height="100" rx="4" fill="#ffffff" stroke="#abb3bf"/>
+<text x="614" y="308" font-size="18" font-weight="700" fill="#20252b">Join + label QA</text>
+<text x="614" y="332" font-size="15" font-weight="400" fill="#58616c">Presence targets</text>
+<rect x="884" y="280" width="204" height="100" rx="4" fill="#ffffff" stroke="#abb3bf"/>
+<text x="898" y="308" font-size="18" font-weight="700" fill="#20252b">Train regression</text>
+<text x="898" y="332" font-size="15" font-weight="400" fill="#58616c">Fit normalization</text>
+<text x="898" y="352" font-size="15" font-weight="400" fill="#58616c">Learn pose mapping</text>
+<path d="M270 130 H314" fill="none" stroke="#1558d6" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M554 130 H598" fill="none" stroke="#1558d6" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M270 330 H314" fill="none" stroke="#1558d6" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M554 330 H598" fill="none" stroke="#1558d6" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M838 330 H882" fill="none" stroke="#1558d6" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M718 182 V278" fill="none" stroke="#1558d6" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M986 278 V182" fill="none" stroke="#1558d6" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="32" y="430" font-size="17" font-weight="400" fill="#58616c">The camera supplies training labels. Inference consumes CSI plus the saved checkpoint.</text>
+</g></svg>
