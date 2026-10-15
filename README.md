@@ -1,14 +1,21 @@
 # WiPose
 
-**Explore the radio signal behind human pose estimation.**
+**Follow WiFi measurements from capture to an 18-joint, single-person 2D pose pipeline.**
 
-WiPose connects ESP32-S3 channel measurements to an 18-joint, single-person 2D pose pipeline: capture, time alignment, teacher labels, training and replay. Start with the signal walkthrough below on any ordinary computer, then move to recorded data or a hardware setup.
+WiPose connects WiFi channel measurements, or **CSI**, to a research pose pipeline. Full inference needs six ESP32-S3 boards or a compatible recording, plus a trained checkpoint.
 
-![Animated WiPose signal path: synthetic I/Q flows through amplitude extraction, alignment and a missing-data gate into 50 ms feature tensors. Pose inference remains inactive because trained weights are required.](figures/signal-path.gif)
+**[Run the signal walkthrough ↓](#run-the-signal-walkthrough)** with NumPy and Pillow. No hardware or model needed. [Pipeline and source map](docs/PIPELINE.md) · [Research recording](#recorded-research-demo)
 
-[Still image / reduced motion](figures/signal-path.png) · [Reproduce the animation](docs/SHOWCASE.md) · [Hardware and research guide](docs/REFERENCE.md) · [Verification](docs/VERIFICATION.md)
+<picture>
+  <source media="(max-width: 600px)" srcset="figures/signal-path-mobile.gif">
+  <img src="figures/signal-path.gif" alt="Executed signal diagnostic on synthetic samples: nine link-amplitude traces, a selected feature window and model-free motion energy. An injected missing-data gap rejects one window. No pose model or hardware measurement.">
+</picture>
 
-## Try it without hardware
+**Synthetic samples, executed processing:** 79 of 80 windows pass; the six-packet gap in RX3/TX3 rejects one. Pose inference stays inactive. [Still / reduced motion](figures/signal-path-mobile.png) · [Computation and record](docs/SHOWCASE.md)
+
+## Run the signal walkthrough
+
+**No boards, camera, broker or trained weights.** This local demonstration executes the retained signal-processing routines on synthetic I/Q samples, the two components of each radio sample.
 
 ```bash
 git clone https://github.com/nazeeh111/WiPose.git
@@ -20,48 +27,49 @@ python -m pip install -r requirements-showcase.txt
 python wipose.py showcase
 ```
 
-Open `showcase-output/signal-path.gif`. The command also writes a still image and a JSON record of the executed transforms. It needs only NumPy and Pillow, runs locally, and makes no network requests or model downloads. Existing output directories are never overwritten; use `--out another-directory` for a second run.
+Open **`showcase-output/signal-path.gif`**. Expected result: **79 of 80 windows accepted; one rejected** by the deliberately injected missing-data gap. The directory also contains a reduced-motion still and a JSON record of the executed transforms. It needs only NumPy and Pillow; the command makes no network requests or model downloads. Existing output paths are refused. For another run, use `python wipose.py showcase --out another-directory`.
 
-The walkthrough synthesizes **9 links × 56 carriers**, calls the actual amplitude and alignment routines, and produces **80 windows shaped 280 × 3 × 3**. An injected six-packet gap makes the existing quality gate reject one window. The motion-energy trace is computed from the input amplitudes. This is a reproducible signal demonstration; it does not measure a room or estimate a person's pose.
+[Desktop still](figures/signal-path.png) · [Narrow-screen still](figures/signal-path-mobile.png) · [Numerical record](figures/signal-path.json) · [Generator](scripts/showcase.py)
 
-## Choose a route
+## How the pieces connect
 
-| Route | What you can do | What you need |
-| --- | --- | --- |
-| **Signal walkthrough** | See the processing stages, changing tensors and missing-data rejection | NumPy + Pillow; no boards or weights |
-| **Recorded replay** | Run the inference pipeline on your own recorded session | Compatible HDF5 session, full dependencies, trained checkpoint |
-| **Live research setup** | Capture synchronized CSI, generate labels, train and infer | Six ESP32-S3 boards, serial links, MQTT, recordings and calibration |
+<picture>
+  <source media="(max-width: 600px)" srcset="figures/pipeline-overview-mobile.svg">
+  <img src="figures/pipeline-overview.svg" alt="WiPose data dependencies: capture CSI, align and gate samples, build feature windows, load a trained checkpoint, estimate 18 joints in 2D. A separate training path combines camera teacher labels with paired CSI to create the checkpoint. The runnable synthetic walkthrough stops before pose inference.">
+</picture>
 
-**CSI** means channel state information: measurements of how the radio channel changes across frequency components. The current model consumes amplitude windows from a 3-transmitter × 3-receiver link matrix. A camera supplies training labels; the trained inference path consumes CSI.
 
-## From measurements to a skeleton
+CSI means **channel state information**: measurements of how a radio channel changes across frequency components. A camera supplies training labels; the trained model's inference input is CSI. [Trace each arrow to its implementation →](docs/PIPELINE.md)
 
-| Stage | Input → output | Implementation |
-| --- | --- | --- |
-| Capture | ESP-NOW beacons → serial CSI frames → raw logs / MQTT / HDF5 | [firmware](firmware), [host](host) |
-| Synchronize | Board and host timestamps → corrected 100 Hz grid | [clock fitting](host/csi_pipe/clockfit.py), [alignment](host/csi_pipe/align.py) |
-| Build samples | Five samples × 56 carriers × nine links → `(280, 3, 3)` tensor + validity | [sample builder](host/csi_pipe/samples.py), [real-time buffer](rt/csi_rt/ringbuf.py) |
-| Label and train | Synchronized camera labels + CSI → pose-model checkpoint | [teacher](teacher), [training](train) |
-| Infer and display | Valid CSI windows + trained checkpoint → 18-joint pose, presence and experimental fall state | [real-time pipeline](rt) |
+## Choose your next step
 
-The animated path intentionally stops at model input. A trained checkpoint supplies the learned mapping to joint coordinates; a moving skeleton drawn from fabricated coordinates would not demonstrate WiFi sensing.
+- **Understand the implementation:** follow the [training and inference flowcharts](docs/PIPELINE.md), including data shapes, checkpoint requirements and invalid-window behavior.
+- **Bring a recording and checkpoint:** use [recorded replay](#replay-your-recorded-session) with a compatible HDF5 session and independently trained model.
+- **Build the research setup:** the [operating guide](docs/REFERENCE.md#getting-started) covers six ESP32-S3 boards, firmware, serial links, MQTT, synchronized recording, calibration and teacher labeling.
 
-## Use your recorded session
+## Recorded research demo
 
-Install the [full requirements](requirements.txt) in a separate research environment. These include Torch, camera, recording and teacher dependencies; they are unnecessary for the walkthrough.
+This retained recording shows the original research project's intended full-system output: estimated 2D pose with an experimental fall-state overlay. It is separate from the synthetic walkthrough above.
+
+<img src="figures/fall-demo.gif" alt="Original csi-pose recorded research demo showing a 2D pose overlay and experimental fall-state banner" width="600">
+
+**Source-reported recording, not newly replicated here.** Retained from [csi-pose](https://github.com/sel00000/csi-pose/tree/02b1001590beea8e7d6daac57a4d8b4a345eb50f) by Kyung-Bo Kim, Hyun-Seok Jang, So-Hyeon Kim and Gyu-Chae Jung. See the [original setup, staged-fall results and session limits](docs/REFERENCE.md#what-it-detects). The recording is not evidence of accuracy in another room or a validated safety system.
+
+## Replay your recorded session
+
+Use a separate research environment for the [full requirements](requirements.txt), including Torch, camera, recording and teacher dependencies. They are unnecessary for the signal walkthrough. You must supply a compatible recording and checkpoint; this is not a bundled trained-model demo.
 
 ```bash
 python -m pip install -r requirements.txt
 python wipose.py infer --help
 
-# Your compatible recording and independently trained checkpoint:
 python wipose.py infer \
   --replay /path/to/session.h5 \
   --ckpt /path/to/checkpoint.pt \
   --headless --fast --perf-out replay-performance.json
 ```
 
-`infer` requires a checkpoint unless you deliberately select `--random-weights` for a pipeline smoke check. Random weights provide no meaningful pose estimate. `train`, `label` and `probe` pass arguments to the underlying tools:
+The checkpoint supplies model weights, channel convention and normalization statistics. `infer` requires it unless you deliberately choose `--random-weights` for a pipeline smoke check. Random weights provide no meaningful pose estimate. See the [inference contract and source](docs/PIPELINE.md#inference-and-replay).
 
 ```bash
 python wipose.py train --help
@@ -69,21 +77,22 @@ python wipose.py label --help
 python wipose.py probe --help
 ```
 
-For boards, firmware, recording formats, calibration and teacher labeling, follow the [operating guide](docs/REFERENCE.md#getting-started). Teacher labeling downloads third-party ONNX models when explicitly run.
+These commands pass arguments to the underlying tools. Teacher labeling downloads third-party ONNX models when explicitly run. Follow the [research setup instructions](docs/REFERENCE.md#getting-started) before attempting capture or training.
 
-## Evidence and scope
+## Evidence and limits
 
-The new walkthrough and [its numerical record](figures/signal-path.json) are generated by [this script](scripts/showcase.py), using the retained computational routines. Its input is synthetic and its missing-data experiment is deliberately injected. The [reference guide](docs/REFERENCE.md#what-it-detects) retains the original recorded pose/fall demonstration and source-reported research results, separately from these checks.
+- **Executed in the presentation work:** deterministic synthetic transforms, injected missing-data rejection, safe output handling, CLI dispatch and bounded kernel comparisons. [Exact checks and environments](docs/VERIFICATION.md).
+- **Retained research material:** the recording, figures and source-reported results in the [reference guide](docs/REFERENCE.md). They have not become new measurements through repackaging.
+- **Not replicated here:** six-board capture, teacher labeling, full training, trained inference accuracy, cross-session performance and fall-detection accuracy. The system targets one person in 2D. Fall detection is experimental and is not a validated safety or medical system.
 
-The current system targets one person in 2D. Six-board capture, trained inference, cross-session pose accuracy and fall accuracy have not been replicated in this packaging work. Fall detection is an experimental research feature and is not a validated safety or medical system. See the [verification record](docs/VERIFICATION.md) for exactly what was run.
+After installing the lightweight showcase requirements:
 
 ```bash
-# After installing the lightweight showcase requirements:
 python -m unittest discover -s tests -v
 ```
 
 ## Source and licensing
 
-WiPose's retained research implementation is based on [csi-pose](https://github.com/sel00000/csi-pose/tree/02b1001590beea8e7d6daac57a4d8b4a345eb50f) by Kyung-Bo Kim, Hyun-Seok Jang, So-Hyeon Kim and Gyu-Chae Jung. New CLI, verification and signal-presentation work is maintained by [nazeeh111](https://github.com/nazeeh111).
+WiPose's retained research implementation is based on [csi-pose](https://github.com/sel00000/csi-pose/tree/02b1001590beea8e7d6daac57a4d8b4a345eb50f) by Kyung-Bo Kim, Hyun-Seok Jang, So-Hyeon Kim and Gyu-Chae Jung. CLI, verification and original signal-presentation work is maintained by [nazeeh111](https://github.com/nazeeh111).
 
 [Source details](NOTICE.md) · [Original license](LICENSE) · [New additions](LICENSE-branding) · [Third-party model notices and unresolved redistribution terms](THIRD_PARTY_NOTICES.md)

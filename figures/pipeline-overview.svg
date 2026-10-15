@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 520" role="img" aria-labelledby="title desc">
+<title id="title">WiPose: capture, learn, replay</title><desc id="desc">CSI capture flows through alignment and feature windows into a checkpoint-loaded model and 18 two-dimensional joints. Training combines paired CSI with camera teacher labels to create that checkpoint. Hardware and trained accuracy are not validated by this diagram.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10" fill="#1558d6"/></marker></defs>
+<rect width="1120" height="520" fill="#ffffff" stroke="#c9cfd6"/>
+<g font-family="Arial, Helvetica, sans-serif">
+<text x="32" y="48" font-size="28" font-weight="700" fill="#20252b">Implemented data path</text>
+<text x="32" y="83" font-size="25" font-weight="400" fill="#20252b">Radio samples, a trained checkpoint and 18 joints in 2D</text>
+<text x="32" y="120" font-size="13" font-weight="700" fill="#1558d6">LIVE OR RECORDED CSI</text>
+<rect x="32" y="140" width="192" height="124" fill="#ffffff" stroke="#abb3bf"/>
+<text x="48" y="166" font-size="13" font-weight="700" fill="#1558d6">01 / HARDWARE</text>
+<text x="48" y="197" font-size="22" font-weight="700" fill="#20252b">Capture</text>
+<text x="48" y="224" font-size="16" font-weight="400" fill="#58616c">3 transmitters</text>
+<text x="48" y="247" font-size="16" font-weight="400" fill="#58616c">3 receivers / 9 links</text>
+<path d="M226 202 H246" fill="none" stroke="#1558d6" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="248" y="140" width="192" height="124" fill="#ffffff" stroke="#abb3bf"/>
+<text x="264" y="166" font-size="13" font-weight="700" fill="#1558d6">02 / PROCESSING</text>
+<text x="264" y="197" font-size="22" font-weight="700" fill="#20252b">Align + gate</text>
+<text x="264" y="224" font-size="16" font-weight="400" fill="#58616c">Corrected 100 Hz grid</text>
+<text x="264" y="247" font-size="16" font-weight="400" fill="#58616c">Mask missing samples</text>
+<path d="M442 202 H462" fill="none" stroke="#1558d6" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="464" y="140" width="192" height="124" fill="#ffffff" stroke="#abb3bf"/>
+<text x="480" y="166" font-size="13" font-weight="700" fill="#1558d6">03 / MODEL INPUT</text>
+<text x="480" y="197" font-size="22" font-weight="700" fill="#20252b">Build windows</text>
+<text x="480" y="224" font-size="16" font-weight="400" fill="#58616c">5 samples × 56 carriers</text>
+<text x="480" y="247" font-size="16" font-weight="400" fill="#58616c">280 × 3 × 3 features</text>
+<path d="M658 202 H678" fill="none" stroke="#1558d6" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="680" y="140" width="192" height="124" fill="#ffffff" stroke="#abb3bf"/>
+<text x="696" y="166" font-size="13" font-weight="700" fill="#1558d6">04 / CHECKPOINT</text>
+<text x="696" y="197" font-size="22" font-weight="700" fill="#20252b">Estimate pose</text>
+<text x="696" y="224" font-size="16" font-weight="400" fill="#58616c">Stored normalization</text>
+<text x="696" y="247" font-size="16" font-weight="400" fill="#58616c">Learned model weights</text>
+<path d="M874 202 H894" fill="none" stroke="#1558d6" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="896" y="140" width="192" height="124" fill="#ffffff" stroke="#abb3bf"/>
+<text x="912" y="166" font-size="13" font-weight="700" fill="#1558d6">05 / OUTPUT</text>
+<text x="912" y="197" font-size="22" font-weight="700" fill="#20252b">18 joints in 2D</text>
+<text x="912" y="224" font-size="16" font-weight="400" fill="#58616c">Presence + smoothing</text>
+<text x="912" y="247" font-size="16" font-weight="400" fill="#58616c">Experimental fall state</text>
+<path d="M32 313 H1088" stroke="#c9cfd6"/>
+<text x="32" y="335" font-size="13" font-weight="700" fill="#1558d6">TRAINING ONLY</text>
+<rect x="152" y="344" width="232" height="124" fill="#ffffff" stroke="#abb3bf"/>
+<text x="168" y="370" font-size="13" font-weight="700" fill="#1558d6">CAMERA → TEACHER</text>
+<text x="168" y="401" font-size="22" font-weight="700" fill="#20252b">Generate labels</text>
+<text x="168" y="428" font-size="16" font-weight="400" fill="#58616c">Synchronized video</text>
+<text x="168" y="451" font-size="16" font-weight="400" fill="#58616c">18-joint training targets</text>
+<rect x="448" y="344" width="192" height="124" fill="#ffffff" stroke="#abb3bf"/>
+<text x="464" y="370" font-size="13" font-weight="700" fill="#1558d6">CSI + LABELS</text>
+<text x="464" y="401" font-size="22" font-weight="700" fill="#20252b">Train model</text>
+<text x="464" y="428" font-size="16" font-weight="400" fill="#58616c">Paired samples</text>
+<text x="464" y="451" font-size="16" font-weight="400" fill="#58616c">Pose regression</text>
+<rect x="680" y="344" width="192" height="124" fill="#ffffff" stroke="#abb3bf"/>
+<text x="696" y="370" font-size="13" font-weight="700" fill="#1558d6">SAVED ARTIFACT</text>
+<text x="696" y="401" font-size="22" font-weight="700" fill="#20252b">Checkpoint</text>
+<text x="696" y="428" font-size="16" font-weight="400" fill="#58616c">Weights + statistics</text>
+<text x="696" y="451" font-size="16" font-weight="400" fill="#58616c">Required for inference</text>
+<path d="M386 406 H446" fill="none" stroke="#1558d6" stroke-width="2" stroke-dasharray="5 5" marker-end="url(#arrow)"/>
+<path d="M642 406 H678" fill="none" stroke="#1558d6" stroke-width="2" stroke-dasharray="5 5" marker-end="url(#arrow)"/>
+<path d="M560 266 V342" fill="none" stroke="#1558d6" stroke-width="2" stroke-dasharray="5 5" marker-end="url(#arrow)"/>
+<text x="574" y="294" font-size="14" font-weight="400" fill="#58616c">paired CSI</text>
+<path d="M776 342 V266" fill="none" stroke="#1558d6" stroke-width="2" stroke-dasharray="5 5" marker-end="url(#arrow)"/>
+<text x="790" y="294" font-size="14" font-weight="400" fill="#58616c">load</text>
+<text x="32" y="500" font-size="16" font-weight="400" fill="#58616c">Implemented dependencies, not a hardware or accuracy validation. The signal walkthrough stops at stage 03.</text>
+</g></svg>
