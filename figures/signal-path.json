@@ -163,7 +163,12 @@
     "playback_duration_ms": 5310,
     "size": [
       1120,
-      660
-    ]
+      700
+    ],
+    "compact_size": [
+      420,
+      650
+    ],
+    "still_frame_index": 29
   }
 }

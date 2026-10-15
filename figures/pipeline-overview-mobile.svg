@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 320" role="img" aria-labelledby="title desc">
+<title id="title">WiPose system map, compact view</title><desc id="desc">Radio samples become aligned CSI windows. Pose inference requires a supplied trained checkpoint and produces 18 joints in two dimensions. Camera labels plus paired CSI train that checkpoint separately.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10" fill="#1558d6"/></marker></defs>
+<rect width="420" height="320" fill="#ffffff" stroke="#c9cfd6"/>
+<g font-family="Arial, Helvetica, sans-serif">
+<text x="24" y="32" font-size="14" font-weight="700" fill="#1558d6">INPUT → MODEL → OUTPUT</text>
+<path d="M24 50 H396" stroke="#abb3bf"/>
+<text x="24" y="78" font-size="21" font-weight="700" fill="#20252b">CSI windows</text>
+<text x="24" y="101" font-size="16" font-weight="400" fill="#58616c">Live packets or recorded session</text>
+<path d="M210 107 V125" fill="none" stroke="#1558d6" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M24 129 H396" stroke="#abb3bf"/>
+<text x="24" y="157" font-size="21" font-weight="700" fill="#20252b">Checkpoint-loaded model</text>
+<text x="24" y="180" font-size="16" font-weight="400" fill="#58616c">Trained weights + saved statistics</text>
+<path d="M210 186 V204" fill="none" stroke="#1558d6" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M24 208 H396" stroke="#abb3bf"/>
+<text x="24" y="236" font-size="21" font-weight="700" fill="#20252b">18 joints in 2D</text>
+<text x="24" y="259" font-size="16" font-weight="400" fill="#58616c">Single-person research pipeline</text>
+<text x="24" y="304" font-size="14" font-weight="400" fill="#58616c">Training: camera labels + paired CSI → checkpoint.</text>
+</g></svg>
