@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 868" role="img" aria-labelledby="title desc">
+<title id="title">Capture → feature windows</title><desc id="desc">Three transmitters send ESP-NOW beacons to three receivers. Serial CSI frames enter the host bridge, which saves raw logs and publishes MQTT. Recorded HDF5 sessions undergo clock fitting, epoch separation, amplitude processing, gap masking, gridding and five-sample window construction.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10" fill="#1558d6"/></marker></defs>
+<rect width="420" height="868" fill="#ffffff" stroke="#c9cfd6"/>
+<g font-family="Arial, Helvetica, sans-serif">
+<text x="24" y="35" font-size="23" font-weight="700" fill="#20252b">Capture → feature windows</text>
+<rect x="24" y="64" width="372" height="82" rx="4" fill="#ffffff" stroke="#abb3bf"/>
+<text x="38" y="92" font-size="19" font-weight="700" fill="#20252b">3 ESP32-S3 transmitters</text>
+<text x="38" y="116" font-size="15" font-weight="400" fill="#58616c">ESP-NOW beacons</text>
+<path d="M210 147 V161" fill="none" stroke="#1558d6" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="24" y="163" width="372" height="82" rx="4" fill="#ffffff" stroke="#abb3bf"/>
+<text x="38" y="191" font-size="19" font-weight="700" fill="#20252b">3 ESP32-S3 receivers</text>
+<text x="38" y="215" font-size="15" font-weight="400" fill="#58616c">CSI frames over serial</text>
+<path d="M210 246 V260" fill="none" stroke="#1558d6" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="24" y="262" width="372" height="82" rx="4" fill="#ffffff" stroke="#abb3bf"/>
+<text x="38" y="290" font-size="19" font-weight="700" fill="#20252b">Host bridge</text>
+<text x="38" y="314" font-size="15" font-weight="400" fill="#58616c">Timestamp + frame</text>
+<text x="38" y="334" font-size="15" font-weight="400" fill="#58616c">Save raw logs; publish MQTT</text>
+<path d="M210 345 V359" fill="none" stroke="#1558d6" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="24" y="361" width="372" height="82" rx="4" fill="#ffffff" stroke="#abb3bf"/>
+<text x="38" y="389" font-size="19" font-weight="700" fill="#20252b">Recorded HDF5 session</text>
+<text x="38" y="413" font-size="15" font-weight="400" fill="#58616c">Recorder subscribes to MQTT</text>
+<path d="M210 444 V458" fill="none" stroke="#1558d6" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="24" y="460" width="372" height="82" rx="4" fill="#ffffff" stroke="#abb3bf"/>
+<text x="38" y="488" font-size="19" font-weight="700" fill="#20252b">Clock fitting</text>
+<text x="38" y="512" font-size="15" font-weight="400" fill="#58616c">Separate board boot epochs</text>
+<path d="M210 543 V557" fill="none" stroke="#1558d6" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="24" y="559" width="372" height="82" rx="4" fill="#ffffff" stroke="#abb3bf"/>
+<text x="38" y="587" font-size="19" font-weight="700" fill="#20252b">Amplitude + gap mask</text>
+<text x="38" y="611" font-size="15" font-weight="400" fill="#58616c">Fill short gaps; retain breaks</text>
+<path d="M210 642 V656" fill="none" stroke="#1558d6" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="24" y="658" width="372" height="82" rx="4" fill="#ffffff" stroke="#abb3bf"/>
+<text x="38" y="686" font-size="19" font-weight="700" fill="#20252b">Corrected 100 Hz grid</text>
+<text x="38" y="710" font-size="15" font-weight="400" fill="#58616c">Align the nine radio links</text>
+<path d="M210 741 V755" fill="none" stroke="#1558d6" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="24" y="757" width="372" height="82" rx="4" fill="#ffffff" stroke="#abb3bf"/>
+<text x="38" y="785" font-size="19" font-weight="700" fill="#20252b">Five-sample windows</text>
+<text x="38" y="809" font-size="15" font-weight="400" fill="#58616c">Feature tensor + validity</text>
+</g></svg>
