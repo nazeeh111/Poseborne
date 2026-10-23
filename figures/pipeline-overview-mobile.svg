@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="420" height="1365" viewBox="0 0 420 1365" role="img" aria-labelledby="title desc">
-<title id="title">WiPose scientific system figure, narrow layout</title>
+<title id="title">Poseborne scientific system figure, narrow layout</title>
 <desc id="desc">Three transmitters and three receivers provide nine CSI links. The default amplitude feature tensor has shape 280 by 3 by 3. A ResNet-18-style WiSPPN encoder produces a 3 by 18 by 18 pose adjacency matrix; its diagonal gives 18 two-dimensional joints and confidence. A separate synchronized-camera teacher and paired-CSI training branch saves a required, unbundled checkpoint. Signal textures and pose glyphs are schematic.</desc>
 <rect width="420" height="1365" fill="white"/>
 <defs>

@@ -1,4 +1,4 @@
-"""Render the WiPose signal path with deterministic synthetic I/Q, never pose inference.
+"""Render the Poseborne signal path with deterministic synthetic I/Q, never pose inference.
 
 The numerical work calls the retained amplitude, alignment, window and motion
 energy routines. Pillow only draws those results. No network or model is used.
@@ -128,7 +128,7 @@ def render_frames(trace, *, font_path=None, compact=False):
             points=[(x+j*width/400,y+height-float(energies[j])*height/max(energies.max(),1))
                     for j in range(sample+1)]
             if len(points)>1:line(points,cobalt,2)
-        txt(24 if compact else 32, 20, "WiPose", 28 if compact else 32)
+        txt(24 if compact else 32, 20, "Poseborne", 28 if compact else 32)
         if compact:
             txt(24,57,"SIGNAL DIAGNOSTIC",13,muted)
             txt(24,83,"Synthetic input · no pose model",16,cobalt)
@@ -148,7 +148,7 @@ def render_frames(trace, *, font_path=None, compact=False):
             txt(24,609,"6 missing packets injected in RX3/TX3",14,warning)
             txt(24,630,"Executed transforms; no hardware measurement.",12,muted)
         else:
-            txt(180,29,"SIGNAL DIAGNOSTIC",16,muted)
+            txt(250,29,"SIGNAL DIAGNOSTIC",16,muted)
             txt(32,74,"Synthetic I/Q · 9 links · 56 carriers · 100 Hz",20)
             txt(815,25,f"t = {sample/100:.2f} s",28)
             txt(815,68,"VALID WINDOW" if good else "REJECTED WINDOW",20,ink if good else warning)

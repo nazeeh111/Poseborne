@@ -1,4 +1,4 @@
-"""Generate WiPose scientific/guide SVGs and badges with the standard library.
+"""Generate Poseborne scientific/guide SVGs and badges with the standard library.
 
 This draws documented data dependencies, not measured radio propagation or poses.
 See docs/PIPELINE.md for the implementation behind each arrow.

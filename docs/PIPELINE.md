@@ -1,4 +1,4 @@
-# Follow the WiPose pipeline
+# Follow the Poseborne pipeline
 
 Trace the implemented capture, training and inference paths to their source. The [verification record](VERIFICATION.md) distinguishes executed checks from retained research results.
 

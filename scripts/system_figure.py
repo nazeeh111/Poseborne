@@ -1,4 +1,4 @@
-"""Original scientific WiPose figure. Standard-library vector source.
+"""Original scientific Poseborne figure. Standard-library vector source.
 
 The signal texture and BODY-18 glyph are explicitly schematic, not results.
 Default shapes come from train/csi_train/model.py and rt/csi_rt/infer.py.
@@ -154,7 +154,7 @@ def checkpoint(p,x,y):
 
 
 def desktop():
-    p=start(1440,885,'WiPose: from radio links to 18-joint 2D pose')
+    p=start(1440,885,'Poseborne: from radio links to 18-joint 2D pose')
     label(p,40,49,'WiFi → 18-joint 2D pose',36,INK,700,display=True)
     label(p,40,83,'Single-person WiSPPN-ESP · default amplitude / PAM route',21,MUTED)
     for x,color,txt in [(760,BLUE,'CSI input'),(945,PURPLE,'Learned model'),(1175,TRAINING,'Training only')]:
@@ -219,7 +219,7 @@ def desktop():
 
 
 def mobile():
-    p=start(420,1365,'WiPose scientific system figure, narrow layout')
+    p=start(420,1365,'Poseborne scientific system figure, narrow layout')
     label(p,24,36,'WiFi → 18 joints in 2D',27,INK,700,display=True)
     label(p,24,66,'Single person · default amplitude / PAM',17,MUTED)
     label(p,24,106,'3 TX × 3 RX · ESP32-S3',22,BLUE,700,display=True)

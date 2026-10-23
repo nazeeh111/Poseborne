@@ -1,4 +1,6 @@
-# WiPose
+# Poseborne
+
+이전 이름은 WiPose이며 기존 `python wipose.py …` 명령도 계속 지원합니다.
 
 [csi-pose](https://github.com/sel00000/csi-pose/tree/02b1001590beea8e7d6daac57a4d8b4a345eb50f)의 파생 패키지입니다. 원 저자는 Kyung-Bo Kim, Hyun-Seok Jang, So-Hyeon Kim, Gyu-Chae Jung이며, 원 연구 결과와 기록된 데모는 이번 패키징 작업에서 재현한 결과가 아닙니다. 추가 기능과 라이선스 범위는 [NOTICE.md](NOTICE.md)를 참고하세요.
 

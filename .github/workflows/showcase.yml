@@ -24,7 +24,7 @@ jobs:
       - name: Check transforms and command dispatch
         run: python -m unittest discover -s tests -v
       - name: Render through the public command with the portable font
-        run: python wipose.py showcase --out showcase-ci
+        run: python poseborne.py showcase --out showcase-ci
       - name: Check exported animation and evidence
         run: |
           python - <<'PY'

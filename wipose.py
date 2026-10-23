@@ -1,4 +1,4 @@
-"""WiPose: WiFi channel measurements into 18-joint pose estimates."""
+"""Poseborne: WiFi channel measurements into 18-joint pose estimates. Legacy wipose.py command retained."""
 import argparse
 from pathlib import Path
 import subprocess

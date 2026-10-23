@@ -1,4 +1,6 @@
-# WiPose
+<a name="wipose"></a>
+
+# Poseborne
 
 **WiFi CSI → an 18-joint, single-person 2D pose.**
 
@@ -13,7 +15,7 @@ This fork adds a command facade, source-traced figures and a reproducible **synt
 <a href="figures/pipeline-overview.svg">
 <picture>
   <source media="(max-width: 600px)" srcset="figures/pipeline-overview-mobile.png">
-  <img src="figures/pipeline-overview.png" alt="Scientific WiPose system figure: three transmitters and three receivers create nine CSI links; amplitude windows form a 280 by 3 by 3 tensor; the ResNet-18-style WiSPPN encoder produces a PAM whose diagonal yields 18 two-dimensional joints and confidence. A separate camera-teacher training path saves the required checkpoint. Signal and pose illustrations are schematic.">
+  <img src="figures/pipeline-overview.png" alt="Scientific Poseborne system figure: three transmitters and three receivers create nine CSI links; amplitude windows form a 280 by 3 by 3 tensor; the ResNet-18-style WiSPPN encoder produces a PAM whose diagonal yields 18 two-dimensional joints and confidence. A separate camera-teacher training path saves the required checkpoint. Signal and pose illustrations are schematic.">
 </picture>
 </a>
 
@@ -30,8 +32,8 @@ Default amplitude/PAM route; signal textures and pose glyphs are schematic. [Edi
 ## Get the code
 
 ```bash
-git clone https://github.com/nazeeh111/WiPose.git
-cd WiPose
+git clone https://github.com/nazeeh111/Poseborne.git
+cd Poseborne
 python -m venv .venv
 # macOS / Linux; Windows: .venv\Scripts\activate
 source .venv/bin/activate
@@ -39,13 +41,15 @@ source .venv/bin/activate
 
 Then install the requirements for your chosen route below.
 
+Previously named **WiPose**. Existing `python wipose.py …` commands remain supported; the research modules, checkpoint formats and output records keep their existing contracts.
+
 ## Run the signal walkthrough
 
 Try the preprocessing path without boards, camera, broker or trained weights:
 
 ```bash
 python -m pip install -r requirements-showcase.txt
-python wipose.py showcase
+python poseborne.py showcase
 ```
 
 <picture>
@@ -69,7 +73,7 @@ Install the [research requirements](requirements.txt) in a separate environment,
 
 ```bash
 python -m pip install -r requirements.txt
-python wipose.py infer \
+python poseborne.py infer \
   --replay /path/to/session.h5 \
   --ckpt /path/to/checkpoint.pt \
   --headless --fast --perf-out replay-performance.json
@@ -77,11 +81,11 @@ python wipose.py infer \
 
 The checkpoint contains weights, the channel convention and normalization statistics. No trained checkpoint is bundled. `--random-weights` provides a pipeline smoke check, not meaningful pose estimates. [Inference contract](docs/PIPELINE.md#inference-and-replay) · [Inference CLI source](rt/demo.py)
 
-For new recordings, follow the [hardware and training guide](docs/REFERENCE.md#getting-started). `python wipose.py train --help`, `python wipose.py label --help` and `python wipose.py probe --help` expose the underlying tools. Teacher labeling downloads third-party ONNX models when run.
+For new recordings, follow the [hardware and training guide](docs/REFERENCE.md#getting-started). `python poseborne.py train --help`, `python poseborne.py label --help` and `python poseborne.py probe --help` expose the underlying tools. Teacher labeling downloads third-party ONNX models when run.
 
 ## Evidence and limits
 
-- **Executed here:** deterministic synthetic transforms, missing-data rejection, safe output handling, CLI dispatch and bounded kernel comparisons. [Signal walkthrough CI](https://github.com/nazeeh111/WiPose/actions/workflows/showcase.yml) · [Verification record](docs/VERIFICATION.md). Run `python -m unittest discover -s tests -v` after installing the lightweight showcase requirements.
+- **Executed here:** deterministic synthetic transforms, missing-data rejection, safe output handling, CLI dispatch and bounded kernel comparisons. [Signal walkthrough CI](https://github.com/nazeeh111/Poseborne/actions/workflows/showcase.yml) · [Verification record](docs/VERIFICATION.md). Run `python -m unittest discover -s tests -v` after installing the lightweight showcase requirements.
 - **Retained from the original research:** the recording, figures and source-reported results in the [reference guide](docs/REFERENCE.md). Six-board capture, teacher labeling, full training and trained inference have not been replicated in this fork.
 - **Scope:** one person in 2D. No cross-session accuracy or fall-safety guarantee. The fall rules are experimental, not a validated safety or medical system. An invalid input window retains the last displayed pose/state, so a visible skeleton can be stale.
 

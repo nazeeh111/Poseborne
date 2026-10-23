@@ -6,7 +6,7 @@ The README animation is an original visualization of actual retained numerical r
 
 ```bash
 python -m pip install -r requirements-showcase.txt
-python wipose.py showcase --out signal-demo
+python poseborne.py showcase --out signal-demo
 ```
 
 The output directory must be new. It contains:

@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1440" height="885" viewBox="0 0 1440 885" role="img" aria-labelledby="title desc">
-<title id="title">WiPose: from radio links to 18-joint 2D pose</title>
+<title id="title">Poseborne: from radio links to 18-joint 2D pose</title>
 <desc id="desc">Three transmitters and three receivers provide nine CSI links. The default amplitude feature tensor has shape 280 by 3 by 3. A ResNet-18-style WiSPPN encoder produces a 3 by 18 by 18 pose adjacency matrix; its diagonal gives 18 two-dimensional joints and confidence. A separate synchronized-camera teacher and paired-CSI training branch saves a required, unbundled checkpoint. Signal textures and pose glyphs are schematic.</desc>
 <rect width="1440" height="885" fill="white"/>
 <defs>
