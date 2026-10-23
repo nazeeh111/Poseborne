@@ -1,16 +1,12 @@
 # WiPose
 
-[![Code: Python](figures/badge-python.svg)](wipose.py) [![Model: PyTorch](figures/badge-pytorch.svg)](train/csi_train/model.py) [![Radio: ESP32-S3](figures/badge-esp32.svg)](firmware/) [![Links: 3 transmitters by 3 receivers](figures/badge-links.svg)](docs/REFERENCE.md#hardware-requirements) [![Pose: 18 joints in 2D](figures/badge-pose.svg)](rt/csi_rt/infer.py) [![Signal walkthrough CI](https://github.com/nazeeh111/WiPose/actions/workflows/showcase.yml/badge.svg?branch=main)](https://github.com/nazeeh111/WiPose/actions/workflows/showcase.yml)
+**WiFi CSI → an 18-joint, single-person 2D pose.**
 
-**Estimate an 18-joint, single-person 2D pose from WiFi channel measurements.**
+From the [original csi-pose researchers](NOTICE.md): six ESP32-S3 boards, nine **CSI** (channel state information) links, camera-labeled training and model-based pose inference. No trained checkpoint is bundled here.
 
-Six ESP32-S3 boards form nine radio links. A learned model maps their **CSI** (channel state information) into joint coordinates, followed by presence gating, smoothing and experimental fall-state rules. A camera supplies training labels; inference uses CSI and a trained checkpoint.
+This fork adds a command facade, source-traced figures and a reproducible **synthetic signal walkthrough**. Six-board capture, training and pose accuracy have not been independently reproduced here. The recorded pose demo remains the original researchers' work.
 
-## Recorded research demo
-
-<img src="figures/fall-demo.gif" alt="Original research recording: estimated 18-joint 2D pose with an experimental fall-state overlay" width="600">
-
-**Original, source-reported recording** from [csi-pose](https://github.com/sel00000/csi-pose/tree/02b1001590beea8e7d6daac57a4d8b4a345eb50f), by Kyung-Bo Kim, Hyun-Seok Jang, So-Hyeon Kim and Gyu-Chae Jung. [Setup and reported results →](docs/REFERENCE.md#what-it-detects)
+[Run the synthetic signal walkthrough](#run-the-signal-walkthrough) · [See the original researchers' recorded demo](#recorded-research-demo)
 
 ## How the pieces connect
 
@@ -27,9 +23,9 @@ Default amplitude/PAM route; signal textures and pose glyphs are schematic. [Edi
 
 | You have | Start here |
 | --- | --- |
+| No hardware or model | [Run the signal walkthrough](#run-the-signal-walkthrough) with NumPy and Pillow |
 | A compatible HDF5 recording and trained checkpoint | [Replay a recorded session](#replay-your-recorded-session) |
 | Six ESP32-S3 boards | [Capture, synchronize, label and train](docs/REFERENCE.md#getting-started) |
-| No hardware or model | [Run the signal walkthrough](#run-the-signal-walkthrough) with NumPy and Pillow |
 
 ## Get the code
 
@@ -42,22 +38,6 @@ source .venv/bin/activate
 ```
 
 Then install the requirements for your chosen route below.
-
-## Replay your recorded session
-
-Install the [research requirements](requirements.txt) in a separate environment, then supply your recording and checkpoint:
-
-```bash
-python -m pip install -r requirements.txt
-python wipose.py infer \
-  --replay /path/to/session.h5 \
-  --ckpt /path/to/checkpoint.pt \
-  --headless --fast --perf-out replay-performance.json
-```
-
-The checkpoint contains weights, the channel convention and normalization statistics. No trained checkpoint is bundled. `--random-weights` provides a pipeline smoke check, not meaningful pose estimates. [Inference contract](docs/PIPELINE.md#inference-and-replay) · [Inference CLI source](rt/demo.py)
-
-For new recordings, follow the [hardware and training guide](docs/REFERENCE.md#getting-started). `python wipose.py train --help`, `python wipose.py label --help` and `python wipose.py probe --help` expose the underlying tools. Teacher labeling downloads third-party ONNX models when run.
 
 ## Run the signal walkthrough
 
@@ -77,9 +57,31 @@ Open **`showcase-output/signal-path.gif`**. The seeded synthetic input yields **
 
 Existing output paths are refused; use `--out another-directory` for another run. [Still / reduced motion](figures/signal-path-mobile.png) · [Numerical record](figures/signal-path.json) · [Computation and reproduction](docs/SHOWCASE.md)
 
+## Recorded research demo
+
+<img src="figures/fall-demo.gif" alt="Original research recording: estimated 18-joint 2D pose with an experimental fall-state overlay" width="600">
+
+**Original, source-reported recording** from [csi-pose](https://github.com/sel00000/csi-pose/tree/02b1001590beea8e7d6daac57a4d8b4a345eb50f), by Kyung-Bo Kim, Hyun-Seok Jang, So-Hyeon Kim and Gyu-Chae Jung. [Setup and reported results →](docs/REFERENCE.md#what-it-detects)
+
+## Replay your recorded session
+
+Install the [research requirements](requirements.txt) in a separate environment, then supply your recording and checkpoint:
+
+```bash
+python -m pip install -r requirements.txt
+python wipose.py infer \
+  --replay /path/to/session.h5 \
+  --ckpt /path/to/checkpoint.pt \
+  --headless --fast --perf-out replay-performance.json
+```
+
+The checkpoint contains weights, the channel convention and normalization statistics. No trained checkpoint is bundled. `--random-weights` provides a pipeline smoke check, not meaningful pose estimates. [Inference contract](docs/PIPELINE.md#inference-and-replay) · [Inference CLI source](rt/demo.py)
+
+For new recordings, follow the [hardware and training guide](docs/REFERENCE.md#getting-started). `python wipose.py train --help`, `python wipose.py label --help` and `python wipose.py probe --help` expose the underlying tools. Teacher labeling downloads third-party ONNX models when run.
+
 ## Evidence and limits
 
-- **Executed here:** deterministic synthetic transforms, missing-data rejection, safe output handling, CLI dispatch and bounded kernel comparisons. [Verification record](docs/VERIFICATION.md). Run `python -m unittest discover -s tests -v` after installing the lightweight showcase requirements.
+- **Executed here:** deterministic synthetic transforms, missing-data rejection, safe output handling, CLI dispatch and bounded kernel comparisons. [Signal walkthrough CI](https://github.com/nazeeh111/WiPose/actions/workflows/showcase.yml) · [Verification record](docs/VERIFICATION.md). Run `python -m unittest discover -s tests -v` after installing the lightweight showcase requirements.
 - **Retained from the original research:** the recording, figures and source-reported results in the [reference guide](docs/REFERENCE.md). Six-board capture, teacher labeling, full training and trained inference have not been replicated in this fork.
 - **Scope:** one person in 2D. No cross-session accuracy or fall-safety guarantee. The fall rules are experimental, not a validated safety or medical system. An invalid input window retains the last displayed pose/state, so a visible skeleton can be stale.
 
