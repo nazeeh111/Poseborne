@@ -146,12 +146,17 @@ def build(h5_path, *, anchor_rate=20.0, fit_window_s=600.0, force=False,
     say = progress or (lambda s: None)
     h = h5py.File(h5_path, "r+")
     try:
-        if ("grid" in h or "samples" in h):
-            if not force:
-                raise SystemExit("기존 /grid·/samples 존재 — --force로 재빌드")
-            for k in ("grid", "samples"):
-                if k in h:
-                    del h[k]
+        if ("grid" in h or "samples" in h) and not force:
+            raise SystemExit("기존 /grid·/samples 존재 — --force로 재빌드")
+        # Check required corrections before removing existing derived groups.
+        vid = h["video/t_ns"][...].astype(np.int64)
+        if len(vid) and corrections is None:
+            raise SystemExit(
+                "영상 앵커 세션 — 보정값 필요: configs/pairing.json 또는 "
+                "--csi-corr-ms/--cam-corr-ms (무보정 빌드는 --no-correction)")
+        for k in ("grid", "samples"):
+            if k in h:
+                del h[k]
         names = sorted(h["links"])
         # 클록핏 필드만 선로드 — 대용량 원시(iq)는 링크 단위 지연 로드 (메모리 피크 ↓)
         per_rx = {}
@@ -205,12 +210,7 @@ def build(h5_path, *, anchor_rate=20.0, fit_window_s=600.0, force=False,
             mask_ds[b0:b1] = mask_blk
             say(f"그리드 {b1}/{G}")
         # 앵커 (+§5.2-3 보정 시프트 — 윈도 선택만 보정, 저장 t_ns는 원시 유지)
-        vid = h["video/t_ns"][...].astype(np.int64)
         if len(vid):
-            if corrections is None:
-                raise SystemExit(
-                    "영상 앵커 세션 — 보정값 필요: configs/pairing.json 또는 "
-                    "--csi-corr-ms/--cam-corr-ms (무보정 빌드는 --no-correction)")
             shift_ns = anchor_shift_ns(corrections["csi_ms"], corrections["cam_ms"])
             corr_meta = {"csi_ms": float(corrections["csi_ms"]),
                          "cam_ms": float(corrections["cam_ms"]),
