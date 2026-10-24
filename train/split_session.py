@@ -39,28 +39,34 @@ def split_indices(t_ns, frac, gap_ns):
 
 def write_split(src, dst, rows, *, role, frac, gap_s, cut_t_ns):
     """src의 행 정렬 그룹(ROW_GROUPS)을 rows 마스크로 슬라이스해 dst에 기록."""
-    with h5py.File(src, "r") as hi, h5py.File(dst, "w") as ho:
-        for k, v in hi.attrs.items():
-            ho.attrs[k] = v
-        n = int(rows.sum())
+    with h5py.File(src, "r") as hi:
+        # Check row alignment before opening (and truncating) the destination.
         for gname in ROW_GROUPS:
             if gname not in hi:
                 continue
-            gi, go = hi[gname], ho.create_group(gname)
-            for k, v in gi.attrs.items():
-                go.attrs[k] = v
-            if "F" in go.attrs:
-                go.attrs["F"] = n              # 행수 attr는 슬라이스 후 값으로 정정
-            for name, ds in gi.items():
+            for name, ds in hi[gname].items():
                 if not isinstance(ds, h5py.Dataset) or ds.shape[0] != len(rows):
                     raise SystemExit(f"{gname}/{name}: 행 정렬 아님 — 분할 불가")
-                go.create_dataset(name, data=ds[...][rows])
-        ho.attrs["split_source"] = str(src)
-        ho.attrs["split_role"] = role
-        ho.attrs["split_frac"] = frac
-        ho.attrs["split_gap_s"] = gap_s
-        ho.attrs["split_cut_t_ns"] = cut_t_ns
-    return n
+        with h5py.File(dst, "w") as ho:
+            for k, v in hi.attrs.items():
+                ho.attrs[k] = v
+            n = int(rows.sum())
+            for gname in ROW_GROUPS:
+                if gname not in hi:
+                    continue
+                gi, go = hi[gname], ho.create_group(gname)
+                for k, v in gi.attrs.items():
+                    go.attrs[k] = v
+                if "F" in go.attrs:
+                    go.attrs["F"] = n              # 행수 attr는 슬라이스 후 값으로 정정
+                for name, ds in gi.items():
+                    go.create_dataset(name, data=ds[...][rows])
+            ho.attrs["split_source"] = str(src)
+            ho.attrs["split_role"] = role
+            ho.attrs["split_frac"] = frac
+            ho.attrs["split_gap_s"] = gap_s
+            ho.attrs["split_cut_t_ns"] = cut_t_ns
+        return n
 
 
 def main(argv=None):
