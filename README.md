@@ -4,7 +4,7 @@
 
 **WiFi CSI → an 18-joint, single-person 2D pose.**
 
-From the [original csi-pose researchers](NOTICE.md): six ESP32-S3 boards, nine **CSI** (channel state information) links, camera-labeled training and model-based pose inference. No trained checkpoint is bundled here.
+The research pipeline uses six ESP32-S3 boards, nine **CSI** (channel state information) links, camera-labeled training and model-based pose inference. No trained checkpoint is bundled here.
 
 This fork adds a command facade, source-traced figures and a reproducible **synthetic signal walkthrough**. Six-board capture, training and pose accuracy have not been independently reproduced here. The recorded pose demo remains the original researchers' work.
 
@@ -65,7 +65,7 @@ Existing output paths are refused; use `--out another-directory` for another run
 
 <img src="figures/fall-demo.gif" alt="Original research recording: estimated 18-joint 2D pose with an experimental fall-state overlay" width="600">
 
-**Original, source-reported recording** from [csi-pose](https://github.com/sel00000/csi-pose/tree/02b1001590beea8e7d6daac57a4d8b4a345eb50f), by Kyung-Bo Kim, Hyun-Seok Jang, So-Hyeon Kim and Gyu-Chae Jung. [Setup and reported results →](docs/REFERENCE.md#what-it-detects)
+**Source-reported recording from the retained research implementation.** [Source and attribution](NOTICE.md) · [Setup and reported results →](docs/REFERENCE.md#what-it-detects)
 
 ## Replay your recorded session
 
