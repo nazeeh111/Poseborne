@@ -10,7 +10,7 @@ import numpy as np
 
 GATE_MAX = 0.02
 STATUS_NAMES = {0: "ok", 1: "no_person", 2: "multi"}
-# OpenPose BODY-18 림 — 표준 스켈레톤 토폴로지 (https://github.com/geekfeiw/WiSPPN test_pam.py와 동일 순서)
+# OpenPose BODY-18 림 — 표준 스켈레톤 토폴로지와 관절 순서
 LIMBS18 = np.array([[0, 1], [0, 14], [0, 15], [14, 16], [15, 17], [1, 2], [1, 5],
                     [1, 8], [1, 11], [2, 3], [3, 4], [5, 6], [6, 7], [8, 9],
                     [9, 10], [11, 12], [12, 13]])

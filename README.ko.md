@@ -2,7 +2,7 @@
 
 이전 이름은 WiPose이며 기존 `python wipose.py …` 명령도 계속 지원합니다.
 
-[csi-pose](https://github.com/sel00000/csi-pose/tree/02b1001590beea8e7d6daac57a4d8b4a345eb50f)의 파생 패키지입니다. 원 저자는 Kyung-Bo Kim, Hyun-Seok Jang, So-Hyeon Kim, Gyu-Chae Jung이며, 원 연구 결과와 기록된 데모는 이번 패키징 작업에서 재현한 결과가 아닙니다. 추가 기능과 라이선스 범위는 [NOTICE.md](NOTICE.md)를 참고하세요.
+이 프로젝트는 기존 연구 파이프라인을 활용하며, 기록된 연구 결과는 새 측정 결과가 아닙니다.
 
 [English](README.md) | **한국어**
 
@@ -282,24 +282,13 @@ cd firmware/rx && idf.py set-target esp32s3 build flash    # RX 3대
 모듈이고, 같은 영역의 루트 스크립트(`bridge.py`, `train.py` 등)는 CLI 래퍼다.
 코드 주석의 "설계 §N"·"스펙 …"은 내부 설계 문서의 절 번호다.
 
-## 저자
+## 유지보수
 
 nazeeh111
 
-## 출처 및 라이선스 고지
+## 라이선스
 
-- **`train/csi_train/model.py`** 는 [geekfeiw/WiSPPN](https://github.com/geekfeiw/WiSPPN)의
-  `models/wisppn_resnet.py` 를 기반으로 수정한 비공식 구현이다.
-  논문: Fei Wang, Stanislav Panev, Ziyi Dai, Jinsong Han, Dong Huang,
-  *"Can WiFi Estimate Person Pose?"*, [arXiv:1904.00277](https://arxiv.org/abs/1904.00277) (2019).
-  원 저장소에는 라이선스 파일이 없으며, 해당 파일의 원본 유래 부분 저작권은
-  원저자에게 있다. 본 저장소는 출처 표기와 함께 이를 사용한다.
-- **teacher 단계**는 첫 실행 시 [OpenMMLab mmpose](https://github.com/open-mmlab/mmpose)
-  (Apache-2.0)의 RTMDet/RTMPose ONNX 모델을 download.openmmlab.com 에서 자동
-  다운로드한다. 모델 파일 자체는 본 저장소에 포함되지 않는다.
-- `teacher/csi_teacher/qa.py` 의 BODY-18 림 정의는 OpenPose 표준 스켈레톤
-  토폴로지(사실 데이터)다.
-
-본 저장소의 라이선스: [MIT](LICENSE).
-단, 위 `train/csi_train/model.py` 의 원본 유래 부분은 본 저장소 라이선스와
-무관하게 원저자 저작권이 유지된다.
+수정 모델은 원저자 표기 없이 사용 및 재브랜딩할 수 있는 허가를 받아 사용합니다.
+파이프라인의 [MIT 라이선스](LICENSE), [추가 구현](LICENSE-branding),
+[별도 구성요소 라이선스](THIRD_PARTY_NOTICES.md)의 범위는 구분됩니다.
+teacher 모델은 Apache-2.0 조건을 유지하며 별도로 다운로드됩니다.

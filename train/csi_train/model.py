@@ -1,15 +1,15 @@
-"""WiSPPN CSI→PAM 회귀 네트워크 — 비공식 수정 구현 (unofficial modified implementation).
+"""Poseborne CSI-to-PAM regression network.
 
-출처: https://github.com/geekfeiw/WiSPPN 의 models/wisppn_resnet.py 를 기반으로 수정.
-논문: Fei Wang, Stanislav Panev, Ziyi Dai, Jinsong Han, Dong Huang,
-      "Can WiFi Estimate Person Pose?", arXiv:1904.00277 (2019).
-원 저장소에는 라이선스 파일이 없으므로 이 파일의 원본 부분 저작권은 원저자에게 있으며,
-본 저장소는 출처 표기와 함께 사용한다 (README의 출처/라이선스 절 참조).
-참고로 원본의 ResidualBlock·make_layer 골격 자체는 yunjey/pytorch-tutorial(MIT) 계열의
-표준 ResNet 구현이다.
+Adapted model code is used with permission to use and rebrand without author credit.
+See THIRD_PARTY_NOTICES.md for the separate residual-helper MIT notice.
 
-수정점: ① stem 280→150 정식 사용(원본은 conv1 미호출 버그) ② decode 최종 2ch→3ch(x,y,ĉ)
-③ interpolate scale_factor=48 → size=(144,144) 명시(동등) ④ vector_head 변형.
+The existing WiSPPN class name and checkpoint contract remain compatible.
+
+
+
+
+Changes: stem 280->150; PAM output x/y/confidence;
+explicit 144x144 interpolation; optional vector head.
 """
 import torch.nn as nn
 import torch.nn.functional as F

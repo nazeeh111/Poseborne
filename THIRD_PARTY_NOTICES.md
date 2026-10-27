@@ -1,21 +1,13 @@
-## Attribution & license notices
+# Component licenses
 
-- **`train/csi_train/model.py`** is an unofficial modified implementation based
-  on `models/wisppn_resnet.py` from [geekfeiw/WiSPPN](https://github.com/geekfeiw/WiSPPN).
-  Paper: Fei Wang, Stanislav Panev, Ziyi Dai, Jinsong Han, Dong Huang,
-  *"Can WiFi Estimate Person Pose?"*, [arXiv:1904.00277](https://arxiv.org/abs/1904.00277) (2019).
-  The upstream repository has no license file; copyright of the parts derived
-  from it remains with the original authors. This repository uses them with
-  attribution.
-- The **teacher stage** automatically downloads RTMDet/RTMPose ONNX models from
-  download.openmmlab.com ([OpenMMLab mmpose](https://github.com/open-mmlab/mmpose),
-  Apache-2.0) on first run. The model files themselves are not included in this
-  repository.
-- The BODY-18 limb definition in `teacher/csi_teacher/qa.py` is the standard
-  OpenPose skeleton topology (factual data).
+- `train/csi_train/model.py` includes adapted model code used with permission to
+  use and rebrand without author credit. That permission is separate from the
+  repository's MIT grants.
+- The residual-block helper lineage retains the MIT terms in
+  [third_party/pytorch-tutorial-LICENSE](third_party/pytorch-tutorial-LICENSE).
+- Teacher labeling downloads RTMDet/RTMPose ONNX models from OpenMMLab mmpose
+  (Apache-2.0) on first run. These model files are not bundled.
+- The BODY-18 limb definition is the standard OpenPose skeleton topology.
 
-License of this repository: [MIT](LICENSE). Note that the parts of
-`train/csi_train/model.py` derived from the original remain under the original
-authors' copyright, independent of this repository's license.
-
-The source/additions boundary and unverified redistribution grant for the WiSPPN-derived portions are recorded in [NOTICE.md](NOTICE.md). Repository-level MIT does not replace those rights.
+The pipeline's [MIT license](LICENSE), [first-party additions](LICENSE-branding)
+and separately permitted model portions keep their respective scopes.

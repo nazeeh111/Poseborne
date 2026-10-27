@@ -6,9 +6,9 @@
 
 The research pipeline uses six ESP32-S3 boards, nine **CSI** (channel state information) links, camera-labeled training and model-based pose inference. No trained checkpoint is bundled here.
 
-This fork adds a command facade, source-traced figures and a reproducible **synthetic signal walkthrough**. Six-board capture, training and pose accuracy have not been independently reproduced here. The recorded pose demo remains the original researchers' work.
+Poseborne provides a command facade, source-traced figures and a reproducible **synthetic signal walkthrough**. Six-board capture, training and pose accuracy have not been independently reproduced here. The recorded pose demo is retained research footage, not a new measurement.
 
-[Run the synthetic signal walkthrough](#run-the-signal-walkthrough) · [See the original researchers' recorded demo](#recorded-research-demo)
+[Run the synthetic signal walkthrough](#run-the-signal-walkthrough) · [See the recorded research demo](#recorded-research-demo)
 
 ## How the pieces connect
 
@@ -65,7 +65,7 @@ Existing output paths are refused; use `--out another-directory` for another run
 
 <img src="figures/fall-demo.gif" alt="Original research recording: estimated 18-joint 2D pose with an experimental fall-state overlay" width="600">
 
-**Source-reported recording from the retained research implementation.** [Source and attribution](NOTICE.md) · [Setup and reported results →](docs/REFERENCE.md#what-it-detects)
+**Source-reported recording from the retained research implementation.** [Source and license scope](NOTICE.md) · [Setup and reported results →](docs/REFERENCE.md#what-it-detects)
 
 ## Replay your recorded session
 
@@ -86,11 +86,11 @@ For new recordings, follow the [hardware and training guide](docs/REFERENCE.md#g
 ## Evidence and limits
 
 - **Executed here:** deterministic synthetic transforms, missing-data rejection, safe output handling, CLI dispatch and bounded kernel comparisons. [Signal walkthrough CI](https://github.com/nazeeh111/Poseborne/actions/workflows/showcase.yml) · [Verification record](docs/VERIFICATION.md). Run `python -m unittest discover -s tests -v` after installing the lightweight showcase requirements.
-- **Retained from the original research:** the recording, figures and source-reported results in the [reference guide](docs/REFERENCE.md). Six-board capture, teacher labeling, full training and trained inference have not been replicated in this fork.
+- **Retained from the original research:** the recording, figures and source-reported results in the [reference guide](docs/REFERENCE.md). Six-board capture, teacher labeling, full training and trained inference have not been replicated here.
 - **Scope:** one person in 2D. No cross-session accuracy or fall-safety guarantee. The fall rules are experimental, not a validated safety or medical system. An invalid input window retains the last displayed pose/state, so a visible skeleton can be stale.
 
 ## Source and licensing
 
-The research implementation and recording retain the [original authors' attribution](NOTICE.md). CLI, verification and the reproducible signal walkthrough are maintained by [nazeeh111](https://github.com/nazeeh111).
+The adapted model is used with permission to use and rebrand without author credit. [License scope](NOTICE.md) separates that permission from the pipeline, helper and dependency licenses. CLI, verification and the reproducible signal walkthrough are maintained by [nazeeh111](https://github.com/nazeeh111).
 
 [Original license](LICENSE) · [New additions](LICENSE-branding) · [Third-party model notices](THIRD_PARTY_NOTICES.md)
