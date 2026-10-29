@@ -162,7 +162,10 @@ def run(argv=None):
                          " (스펙 §오버레이)")
 
     cfg = load_rt_config(args.config)
-    est = PoseEstimator(args.ckpt, random_weights=args.random_weights)
+    try:
+        est = PoseEstimator(args.ckpt, random_weights=args.random_weights, packet_only=True)
+    except ValueError as error:
+        ap.error(str(error))
     video = ReplayVideo(args.replay, args.video, args.pairing) if args.video else None
     engine = Engine(est, cfg, force_present=args.random_weights, video=video)
     settle_ns = int(cfg["settle_ms"] * 1e6)

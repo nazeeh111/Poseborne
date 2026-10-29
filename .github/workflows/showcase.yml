@@ -42,3 +42,22 @@ jobs:
                   animation.seek(index)
                   animation.load()
           PY
+
+  inference-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - name: Install CPU inference test dependencies
+        run: |
+          python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+          python -m pip install numpy h5py PyYAML
+      - name: Run real model feature-contract checks (synthetic, random weights)
+        run: |
+          python -c "import torch, h5py, yaml"
+          python -m unittest discover -s tests -p test_inference_contract.py -v

@@ -127,17 +127,50 @@ def rssi_rescale(Xn, RS):
     return Xn
 
 
-def normalize_rows(rows, features, mu, sigma, mu_phase=None, sigma_phase=None):
-    """Rows → 결합 X(f16) — amp: L2(→rssi 재스케일)→z-score / phase: 자체 z-score."""
+def normalize_inputs(X, features, mu, sigma, *, phase=None, rssi=None,
+                     mu_phase=None, sigma_phase=None):
+    """Raw batch (N,280,3,3) to the exact f16 training/evaluation feature contract.
+
+    Optional features must be supplied explicitly; amplitude cannot stand in for
+    RSSI or phase. The returned f16 boundary is also used during inference.
+    """
     feats = _canon_features(features)
-    Xn = l2_normalize(rows.X)
+    X = np.asarray(X)
+    if X.ndim != 4 or X.shape[1:] != (IN_CH, 3, 3):
+        raise ValueError(f"CSI amplitude shape {X.shape} must be (N,280,3,3)")
+    if not np.isfinite(X).all():
+        raise ValueError("CSI amplitude must be finite")
+
+    def optional(value, name, shape, required):
+        if (value is not None) != required:
+            raise ValueError(f"{name} {'required by' if required else 'not declared in'} checkpoint features")
+        if required:
+            value = np.asarray(value)
+            if value.shape != shape or not np.isfinite(value).all():
+                raise ValueError(f"{name} must be finite with shape {shape}")
+        return value
+
+    phase = optional(phase, "phase", X.shape, "phase" in feats)
+    rssi = optional(rssi, "rssi", (len(X), 5, 3, 3), "rssi" in feats)
+    Xn = l2_normalize(X)
     if "rssi" in feats:
-        Xn = rssi_rescale(Xn, rows.RS)
-    X = apply_stats(Xn, mu, sigma)
+        Xn = rssi_rescale(Xn, rssi)
+    amp = apply_stats(Xn, mu, sigma)
     if "phase" in feats:
-        X = np.concatenate([X, apply_stats(rows.XP.astype(np.float32),
-                                           mu_phase, sigma_phase)], axis=1)
-    return X
+        amp = np.concatenate([amp, apply_stats(phase.astype(np.float32),
+                                               mu_phase, sigma_phase)], axis=1)
+    if not np.isfinite(amp).all():
+        raise ValueError("normalized CSI features must be finite; check input and checkpoint statistics")
+    return amp
+
+
+def normalize_rows(rows, features, mu, sigma, mu_phase=None, sigma_phase=None):
+    """Rows to combined f16 features, shared with checkpoint inference."""
+    feats = _canon_features(features)
+    return normalize_inputs(rows.X, feats, mu, sigma,
+                            phase=rows.XP if "phase" in feats else None,
+                            rssi=rows.RS if "rssi" in feats else None,
+                            mu_phase=mu_phase, sigma_phase=sigma_phase)
 
 
 def build_splits(manifest, features=()):

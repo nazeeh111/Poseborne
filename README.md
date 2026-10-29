@@ -79,6 +79,8 @@ python poseborne.py infer \
   --headless --fast --perf-out replay-performance.json
 ```
 
+Packet replay supports amplitude-only checkpoints. RSSI/phase checkpoints require built HDF5 evaluation or explicit feature arrays in the Python estimator; replay rejects them before opening a source. [Feature contract and executable checks](docs/INFERENCE_CONTRACT.md).
+
 The checkpoint contains weights, the channel convention and normalization statistics. No trained checkpoint is bundled. `--random-weights` provides a pipeline smoke check, not meaningful pose estimates. [Inference contract](docs/PIPELINE.md#inference-and-replay) · [Inference CLI source](rt/demo.py)
 
 For new recordings, follow the [hardware and training guide](docs/REFERENCE.md#getting-started). `python poseborne.py train --help`, `python poseborne.py label --help` and `python poseborne.py probe --help` expose the underlying tools. Teacher labeling downloads third-party ONNX models when run.
