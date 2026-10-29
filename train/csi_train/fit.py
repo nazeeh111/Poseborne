@@ -14,7 +14,7 @@ import numpy as np
 import torch
 
 from .augment import augment_batch, mu0_from_stats
-from .data import CHANNEL_CONVENTION, diag_pose
+from .data import CHANNEL_CONVENTION, IN_CH, _canon_features, diag_pose
 from .loss import pose_loss
 from .model import WiSPPN
 from .pck import calibrate_kappa, evaluate
@@ -82,8 +82,26 @@ def save_ckpt(path, model, *, mu, sigma, config, kappa, best,
 
 
 def load_ckpt(path, *, device="cpu"):
-    ck = torch.load(path, map_location=device)             # weights_only=True 기본(2.6+)
+    ck = torch.load(path, map_location=device, weights_only=True)
+    if ck.get("channel_convention") != CHANNEL_CONVENTION:
+        raise ValueError("checkpoint channel_convention does not match receiver/transmitter ordering")
     cfg = ck["config"]
+    features = _canon_features(cfg.get("features", []))  # legacy amplitude checkpoints
+    expected_channels = IN_CH * (2 if "phase" in features else 1)
+    if cfg["in_ch"] != expected_channels:
+        raise ValueError(f"checkpoint in_ch={cfg['in_ch']} does not match features {features}")
+    pairs = [("mu", "sigma")]
+    if "phase" in features:
+        pairs.append(("mu_phase", "sigma_phase"))
+    for mean_key, scale_key in pairs:
+        for key in (mean_key, scale_key):
+            value = ck.get(key)
+            if not isinstance(value, torch.Tensor) or tuple(value.shape) != (3, 3):
+                raise ValueError(f"checkpoint {key} must be a (3,3) tensor")
+            if not bool(torch.isfinite(value).all()):
+                raise ValueError(f"checkpoint {key} must be finite")
+        if not bool((ck[scale_key] > 0).all()):
+            raise ValueError(f"checkpoint {scale_key} must be positive")
     model = WiSPPN(in_ch=cfg["in_ch"], vector_head=cfg["vector_head"]).to(device)
     model.load_state_dict(ck["state_dict"])
     model.eval()

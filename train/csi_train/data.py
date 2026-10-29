@@ -91,6 +91,9 @@ def load_role(manifest, role, features=()):
                 presence=np.concatenate([p[0]["presence"] for p in parts]),
                 WH=np.concatenate([p[1] for p in parts]),
                 stype=np.concatenate([p[2] for p in parts]))
+    if not len(rows.X):
+        raise SystemExit(f"role={role}: no valid labeled CSI samples; inspect missing links, "
+                         "sample validity and teacher label admission")
     if "phase" in feats:
         rows.XP = np.concatenate([p[0]["XP"] for p in parts])
     if "rssi" in feats:
@@ -127,17 +130,50 @@ def rssi_rescale(Xn, RS):
     return Xn
 
 
-def normalize_rows(rows, features, mu, sigma, mu_phase=None, sigma_phase=None):
-    """Rows → 결합 X(f16) — amp: L2(→rssi 재스케일)→z-score / phase: 자체 z-score."""
+def normalize_inputs(X, features, mu, sigma, *, phase=None, rssi=None,
+                     mu_phase=None, sigma_phase=None):
+    """Raw batch (N,280,3,3) to the exact f16 training/evaluation feature contract.
+
+    Optional features must be supplied explicitly; amplitude cannot stand in for
+    RSSI or phase. The returned f16 boundary is also used during inference.
+    """
     feats = _canon_features(features)
-    Xn = l2_normalize(rows.X)
+    X = np.asarray(X)
+    if X.ndim != 4 or X.shape[1:] != (IN_CH, 3, 3):
+        raise ValueError(f"CSI amplitude shape {X.shape} must be (N,280,3,3)")
+    if not np.isfinite(X).all():
+        raise ValueError("CSI amplitude must be finite")
+
+    def optional(value, name, shape, required):
+        if (value is not None) != required:
+            raise ValueError(f"{name} {'required by' if required else 'not declared in'} checkpoint features")
+        if required:
+            value = np.asarray(value)
+            if value.shape != shape or not np.isfinite(value).all():
+                raise ValueError(f"{name} must be finite with shape {shape}")
+        return value
+
+    phase = optional(phase, "phase", X.shape, "phase" in feats)
+    rssi = optional(rssi, "rssi", (len(X), 5, 3, 3), "rssi" in feats)
+    Xn = l2_normalize(X)
     if "rssi" in feats:
-        Xn = rssi_rescale(Xn, rows.RS)
-    X = apply_stats(Xn, mu, sigma)
+        Xn = rssi_rescale(Xn, rssi)
+    amp = apply_stats(Xn, mu, sigma)
     if "phase" in feats:
-        X = np.concatenate([X, apply_stats(rows.XP.astype(np.float32),
-                                           mu_phase, sigma_phase)], axis=1)
-    return X
+        amp = np.concatenate([amp, apply_stats(phase.astype(np.float32),
+                                               mu_phase, sigma_phase)], axis=1)
+    if not np.isfinite(amp).all():
+        raise ValueError("normalized CSI features must be finite; check input and checkpoint statistics")
+    return amp
+
+
+def normalize_rows(rows, features, mu, sigma, mu_phase=None, sigma_phase=None):
+    """Rows to combined f16 features, shared with checkpoint inference."""
+    feats = _canon_features(features)
+    return normalize_inputs(rows.X, feats, mu, sigma,
+                            phase=rows.XP if "phase" in feats else None,
+                            rssi=rows.RS if "rssi" in feats else None,
+                            mu_phase=mu_phase, sigma_phase=sigma_phase)
 
 
 def build_splits(manifest, features=()):
@@ -145,6 +181,27 @@ def build_splits(manifest, features=()):
 
     f32 중간본은 분할당 1개만 라이브 (실데이터 피크 억제 — 품질 리뷰 반영).
     train 인라인 경로와 normalize_rows는 같은 수식 — 정규화 순서 변경 시 둘 다 수정."""
+    # A training run cannot call the same physical session its held-out set.
+    # Resolve path aliases and hard links; arbitrary metadata/session labels do
+    # not prove that two distinct files contain independent recordings.
+    seen = {"train": set(), "val": set()}
+    for entry in manifest["sessions"]:
+        role = entry["role"]
+        if role not in seen:
+            continue
+        path = Path(entry["h5"]).resolve()
+        identities = {("path", str(path))}
+        try:
+            stat = path.stat()
+        except OSError:
+            pass  # load_role will report the actual unreadable/missing input.
+        else:
+            identities.add(("file", stat.st_dev, stat.st_ino))
+        other = "val" if role == "train" else "train"
+        if identities & seen[other]:
+            raise SystemExit(f"train/val overlap: {path} names the same session file; "
+                             "use distinct held-out sessions or the documented temporal split")
+        seen[role].update(identities)
     feats = _canon_features(features)
     tr, va = load_role(manifest, "train", feats), load_role(manifest, "val", feats)
     Xtr = l2_normalize(tr.X)

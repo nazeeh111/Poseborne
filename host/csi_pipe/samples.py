@@ -2,8 +2,10 @@
 
 블록 단위 기록으로 장시간 세션 메모리 제한. 앵커 = /video/t_ns (있으면) 또는
 합성 등간격(anchor_rate Hz)."""
+from contextlib import contextmanager
 import json
 from pathlib import Path
+from uuid import uuid4
 
 import h5py
 import numpy as np
@@ -14,6 +16,108 @@ from .clockfit import fit_board
 
 STEP_NS = 10_000_000  # 100Hz
 N_FEAT = 113                          # 값 열: amp[:56] ‖ phase[56:112] ‖ rssi[112]
+LINK_NAMES = tuple(f"{rx}{tx}" for rx in range(3) for tx in range(3))
+
+
+def _link_names(h):
+    """Admit raw link groups without silently aliasing tensor coordinates.
+
+    A partial recording remains useful for diagnosis. Its absent links are
+    masked below, so none of its nine-link training windows can be valid.
+    """
+    if "links" not in h or not isinstance(h["links"], h5py.Group) or not len(h["links"]):
+        raise SystemExit("/links must contain recorded receiver/transmitter groups")
+    names = sorted(h["links"])
+    unknown = sorted(set(names) - set(LINK_NAMES))
+    if unknown:
+        raise SystemExit(f"unsupported link names {unknown}; expected keys 00 through 22")
+    for name in names:
+        group = h[f"links/{name}"]
+        if not isinstance(group, h5py.Group):
+            raise SystemExit(f"links/{name} must be a raw packet group")
+        n = None
+        for field in ("t_ns", "esp_us", "boot_id", "iq", "seq", "rssi"):
+            ds = group.get(field)
+            if not isinstance(ds, h5py.Dataset) or ds.ndim == 0:
+                raise SystemExit(f"links/{name}/{field} must be a row-aligned packet dataset")
+            if n is None:
+                n = len(ds)
+            expected = (n, 56, 2) if field == "iq" else (n,)
+            if ds.shape != expected or ds.dtype.kind not in "iu":
+                raise SystemExit(f"links/{name}/{field} must be an integer dataset of shape {expected}")
+        if n < 2:
+            raise SystemExit(f"link {name} needs at least two recorded packets")
+    return names
+
+
+
+def _promote_build(h, stage_name):
+    """Publish computed groups, retaining old HDF5 objects until success.
+
+    Hard links retain previous objects without duplicating the session arrays.
+    A failed recovery keeps the staging group and its backup links for repair.
+    This handles ordinary Python/HDF5 operation errors, not corrupt storage or
+    crash/power-loss atomicity.
+    """
+    stage = h[stage_name]
+    previous = stage.create_group("previous")
+    publishing = False
+    try:
+        for key in ("grid", "samples"):
+            if key in h:
+                previous[key] = h[key]
+        had_metadata = "build" in h["meta"].attrs
+        previous.attrs["had_build_metadata"] = had_metadata
+        if had_metadata:
+            previous.attrs["build"] = h["meta"].attrs["build"]
+        publishing = True
+        for key in ("grid", "samples"):
+            if key in h:
+                del h[key]
+            h[key] = stage[key]
+        h["meta"].attrs["build"] = stage.attrs["build"]
+        h.flush()
+    except BaseException as error:
+        failures = []
+        if publishing:
+            for key in ("grid", "samples"):
+                try:
+                    if key in h:
+                        del h[key]
+                    if key in previous:
+                        h[key] = previous[key]
+                except Exception as restore_error:
+                    failures.append(f"{key}: {restore_error}")
+            try:
+                if had_metadata:
+                    h["meta"].attrs["build"] = previous.attrs["build"]
+                elif "build" in h["meta"].attrs:
+                    del h["meta"].attrs["build"]
+            except Exception as restore_error:
+                failures.append(f"build metadata: {restore_error}")
+        if failures:
+            raise RuntimeError(f"Build promotion recovery failed; previous data retained at "
+                               f"/{stage_name}/previous ({'; '.join(failures)})") from error
+        del h[stage_name]
+        raise
+    else:
+        del h[stage_name]
+
+
+@contextmanager
+def _build_stage(h):
+    """Keep the current result linked while computing its replacement."""
+    name = f"_poseborne_build_{uuid4().hex}"
+    stage = h.create_group(name)
+    try:
+        yield stage
+    except BaseException:
+        # Computation has not replaced any public output or metadata yet.
+        del h[name]
+        raise
+    else:
+        # Promotion owns its cleanup; especially do not erase recovery backups.
+        _promote_build(h, name)
 
 
 def anchor_shift_ns(csi_ms, cam_ms):
@@ -143,6 +247,19 @@ def build(h5_path, *, anchor_rate=20.0, fit_window_s=600.0, force=False,
     corrections: {"csi_ms", "cam_ms"[, "source"]} | None — §5.2-3 보정 앵커
     (스펙 2026-06-11-correction-apply). 영상 앵커 세션은 필수(fail-loud),
     합성 앵커는 무시. /samples/t_ns는 항상 원시 영상 스탬프(pam 조인 계약)."""
+    # Reject invalid numerical controls before opening a file for mutation.
+    for name, value in (("anchor_rate", anchor_rate), ("fit_window_s", fit_window_s)):
+        if (not isinstance(value, (int, float, np.integer, np.floating))
+                or isinstance(value, (bool, np.bool_)) or not np.isfinite(value) or value <= 0):
+            raise SystemExit(f"{name} must be a positive finite number")
+    for name, value, lower in (("block", block, 1), ("max_gap_run", max_gap_run, 0)):
+        if (not isinstance(value, (int, np.integer))
+                or isinstance(value, (bool, np.bool_)) or value < lower):
+            raise SystemExit(f"{name} must be an integer >= {lower}")
+    period = 1e9 / float(anchor_rate)
+    if not np.isfinite(period) or not 1 <= round(period) <= np.iinfo(np.int64).max:
+        raise SystemExit("anchor_rate must resolve to a positive int64 nanosecond interval")
+    anchor_step_ns = round(period)
     say = progress or (lambda s: None)
     h = h5py.File(h5_path, "r+")
     try:
@@ -154,10 +271,7 @@ def build(h5_path, *, anchor_rate=20.0, fit_window_s=600.0, force=False,
             raise SystemExit(
                 "영상 앵커 세션 — 보정값 필요: configs/pairing.json 또는 "
                 "--csi-corr-ms/--cam-corr-ms (무보정 빌드는 --no-correction)")
-        for k in ("grid", "samples"):
-            if k in h:
-                del h[k]
-        names = sorted(h["links"])
+        names = _link_names(h)
         # 클록핏 필드만 선로드 — 대용량 원시(iq)는 링크 단위 지연 로드 (메모리 피크 ↓)
         per_rx = {}
         for name in names:
@@ -179,36 +293,13 @@ def build(h5_path, *, anchor_rate=20.0, fit_window_s=600.0, force=False,
             del d
             if s is None:
                 raise SystemExit(f"링크 {key}: 유효 표본 부족 — 빌드 불가")
+            if not np.isfinite(s.amp).all() or np.any(np.abs(s.amp) > np.finfo(np.float16).max):
+                raise SystemExit(f"link {name}: features must be finite and representable as float16")
             streams[key] = s
         g0, g1 = grid_bounds(list(streams.values()), step_ns=STEP_NS)
         G = int((g1 - g0) // STEP_NS)
         if G < WIN:
             raise SystemExit("공통 가용 구간이 윈도보다 짧음")
-        gg = h.create_group("grid")
-        gg.create_dataset("t_ns", data=(g0 + STEP_NS * np.arange(G, dtype=np.int64))
-                          .astype(np.uint64))
-        amp_ds = gg.create_dataset("amp", shape=(G, 56, 3, 3), dtype=np.float16,
-                                   chunks=(min(4096, G), 56, 3, 3))
-        phase_ds = gg.create_dataset("phase", shape=(G, 56, 3, 3), dtype=np.float16,
-                                     chunks=(min(4096, G), 56, 3, 3))
-        rssi_ds = gg.create_dataset("rssi", shape=(G, 3, 3), dtype=np.float16,
-                                    chunks=(min(65536, G), 3, 3))
-        mask_ds = gg.create_dataset("mask", shape=(G, 3, 3), dtype=bool,
-                                    chunks=(min(65536, G), 3, 3))
-        for b0 in range(0, G, block):
-            b1 = min(b0 + block, G)
-            tb = g0 + STEP_NS * np.arange(b0, b1, dtype=np.int64)
-            feat_blk = np.zeros((b1 - b0, N_FEAT, 3, 3), np.float32)
-            mask_blk = np.zeros((b1 - b0, 3, 3), bool)
-            for (i, j), s in streams.items():
-                a, m = grid_block(s, tb)
-                feat_blk[:, :, i, j] = a
-                mask_blk[:, i, j] = m
-            amp_ds[b0:b1] = feat_blk[:, :56].astype(np.float16)
-            phase_ds[b0:b1] = feat_blk[:, 56:112].astype(np.float16)
-            rssi_ds[b0:b1] = feat_blk[:, 112].astype(np.float16)
-            mask_ds[b0:b1] = mask_blk
-            say(f"그리드 {b1}/{G}")
         # 앵커 (+§5.2-3 보정 시프트 — 윈도 선택만 보정, 저장 t_ns는 원시 유지)
         if len(vid):
             shift_ns = anchor_shift_ns(corrections["csi_ms"], corrections["cam_ms"])
@@ -222,34 +313,63 @@ def build(h5_path, *, anchor_rate=20.0, fit_window_s=600.0, force=False,
             shift_ns = 0
             corr_meta = {"source": "n/a(synthetic)"}
             anchors = np.arange(g0 + WIN * STEP_NS, g1 + 1,
-                                round(1e9 / anchor_rate), dtype=np.int64)
+                                anchor_step_ns, dtype=np.int64)
             src = f"synthetic@{anchor_rate}Hz"
         anchors = np.sort(anchors)      # 영상 앵커는 기록순 무보장 — 배칭 searchsorted 전제
         starts, ok = window_indices(g0, STEP_NS, G, anchors - shift_ns)
         starts, anchors = starts[ok], anchors[ok]
         if len(starts) == 0:
             raise SystemExit("유효 앵커 없음 — 앵커 시각이 그리드와 겹치지 않음")
-        sg = h.create_group("samples")
-        N = len(starts)
-        X_ds = sg.create_dataset("X", shape=(N, WIN * 56, 3, 3), dtype=np.float16,
-                                 chunks=(min(1024, max(1, N)), WIN * 56, 3, 3))
-        XP_ds = sg.create_dataset("X_phase", shape=(N, WIN * 56, 3, 3), dtype=np.float16,
-                                  chunks=(min(1024, max(1, N)), WIN * 56, 3, 3))
-        RS_ds = sg.create_dataset("rssi", shape=(N, WIN, 3, 3), dtype=np.float16,
-                                  chunks=(min(4096, max(1, N)), WIN, 3, 3))
-        valid_all = _cut_into(X_ds, amp_ds, mask_ds, starts, label="샘플", say=say)
-        v_p = _cut_into(XP_ds, phase_ds, mask_ds, starts, label="샘플(위상)", say=say)
-        v_r = _cut_into(RS_ds, rssi_ds, mask_ds, starts, label="샘플(rssi)", say=say)
-        if not (np.array_equal(valid_all, v_p) and np.array_equal(valid_all, v_r)):
-            raise SystemExit("X/X_phase/rssi valid 불일치 — 빌드 내부 오류")
-        sg.create_dataset("t_ns", data=anchors.astype(np.uint64))
-        sg.create_dataset("valid", data=valid_all)
-        h["meta"].attrs["build"] = json.dumps(
-            {"anchors": src, "G": G, "N": len(starts),
-             "features": ["amp", "phase", "rssi"],
-             "corrections": corr_meta,
-             "fit": {str(k): v for k, v in fit_stats.items()},
-             "fit_window_s": fit_window_s}, ensure_ascii=False)
+        with _build_stage(h) as stage:
+            gg = stage.create_group("grid")
+            gg.create_dataset("t_ns", data=(g0 + STEP_NS * np.arange(G, dtype=np.int64))
+                              .astype(np.uint64))
+            amp_ds = gg.create_dataset("amp", shape=(G, 56, 3, 3), dtype=np.float16,
+                                       chunks=(min(4096, G), 56, 3, 3))
+            phase_ds = gg.create_dataset("phase", shape=(G, 56, 3, 3), dtype=np.float16,
+                                         chunks=(min(4096, G), 56, 3, 3))
+            rssi_ds = gg.create_dataset("rssi", shape=(G, 3, 3), dtype=np.float16,
+                                        chunks=(min(65536, G), 3, 3))
+            mask_ds = gg.create_dataset("mask", shape=(G, 3, 3), dtype=bool,
+                                        chunks=(min(65536, G), 3, 3))
+            for b0 in range(0, G, block):
+                b1 = min(b0 + block, G)
+                tb = g0 + STEP_NS * np.arange(b0, b1, dtype=np.int64)
+                feat_blk = np.zeros((b1 - b0, N_FEAT, 3, 3), np.float32)
+                # Absent links are missing observations, never measured zeros.
+                mask_blk = np.ones((b1 - b0, 3, 3), bool)
+                for (i, j), s in streams.items():
+                    a, m = grid_block(s, tb)
+                    feat_blk[:, :, i, j] = a
+                    mask_blk[:, i, j] = m
+                amp_ds[b0:b1] = feat_blk[:, :56].astype(np.float16)
+                phase_ds[b0:b1] = feat_blk[:, 56:112].astype(np.float16)
+                rssi_ds[b0:b1] = feat_blk[:, 112].astype(np.float16)
+                mask_ds[b0:b1] = mask_blk
+                say(f"그리드 {b1}/{G}")
+            sg = stage.create_group("samples")
+            N = len(starts)
+            X_ds = sg.create_dataset("X", shape=(N, WIN * 56, 3, 3), dtype=np.float16,
+                                     chunks=(min(1024, max(1, N)), WIN * 56, 3, 3))
+            XP_ds = sg.create_dataset("X_phase", shape=(N, WIN * 56, 3, 3), dtype=np.float16,
+                                      chunks=(min(1024, max(1, N)), WIN * 56, 3, 3))
+            RS_ds = sg.create_dataset("rssi", shape=(N, WIN, 3, 3), dtype=np.float16,
+                                      chunks=(min(4096, max(1, N)), WIN, 3, 3))
+            valid_all = _cut_into(X_ds, amp_ds, mask_ds, starts, label="샘플", say=say)
+            v_p = _cut_into(XP_ds, phase_ds, mask_ds, starts, label="샘플(위상)", say=say)
+            v_r = _cut_into(RS_ds, rssi_ds, mask_ds, starts, label="샘플(rssi)", say=say)
+            if not (np.array_equal(valid_all, v_p) and np.array_equal(valid_all, v_r)):
+                raise SystemExit("X/X_phase/rssi valid 불일치 — 빌드 내부 오류")
+            sg.create_dataset("t_ns", data=anchors.astype(np.uint64))
+            sg.create_dataset("valid", data=valid_all)
+            stage.attrs["build"] = json.dumps(
+                {"anchors": src, "G": G, "N": len(starts),
+                 "features": ["amp", "phase", "rssi"],
+                 "links": {"present": names,
+                           "missing": sorted(set(LINK_NAMES) - set(names))},
+                 "corrections": corr_meta,
+                 "fit": {str(k): v for k, v in fit_stats.items()},
+                 "fit_window_s": float(fit_window_s)}, ensure_ascii=False)
         return {"G": G, "N": int(len(starts)), "fit": fit_stats,
                 "valid_ratio": float(valid_all.mean()) if len(valid_all) else 0.0}
     finally:
