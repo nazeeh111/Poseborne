@@ -91,6 +91,9 @@ def load_role(manifest, role, features=()):
                 presence=np.concatenate([p[0]["presence"] for p in parts]),
                 WH=np.concatenate([p[1] for p in parts]),
                 stype=np.concatenate([p[2] for p in parts]))
+    if not len(rows.X):
+        raise SystemExit(f"role={role}: no valid labeled CSI samples; inspect missing links, "
+                         "sample validity and teacher label admission")
     if "phase" in feats:
         rows.XP = np.concatenate([p[0]["XP"] for p in parts])
     if "rssi" in feats:
@@ -178,6 +181,27 @@ def build_splits(manifest, features=()):
 
     f32 중간본은 분할당 1개만 라이브 (실데이터 피크 억제 — 품질 리뷰 반영).
     train 인라인 경로와 normalize_rows는 같은 수식 — 정규화 순서 변경 시 둘 다 수정."""
+    # A training run cannot call the same physical session its held-out set.
+    # Resolve path aliases and hard links; arbitrary metadata/session labels do
+    # not prove that two distinct files contain independent recordings.
+    seen = {"train": set(), "val": set()}
+    for entry in manifest["sessions"]:
+        role = entry["role"]
+        if role not in seen:
+            continue
+        path = Path(entry["h5"]).resolve()
+        identities = {("path", str(path))}
+        try:
+            stat = path.stat()
+        except OSError:
+            pass  # load_role will report the actual unreadable/missing input.
+        else:
+            identities.add(("file", stat.st_dev, stat.st_ino))
+        other = "val" if role == "train" else "train"
+        if identities & seen[other]:
+            raise SystemExit(f"train/val overlap: {path} names the same session file; "
+                             "use distinct held-out sessions or the documented temporal split")
+        seen[role].update(identities)
     feats = _canon_features(features)
     tr, va = load_role(manifest, "train", feats), load_role(manifest, "val", feats)
     Xtr = l2_normalize(tr.X)

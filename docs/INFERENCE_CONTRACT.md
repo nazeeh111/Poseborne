@@ -72,3 +72,48 @@ recordings with synchronized teacher labels, `valid`, `label_ok`, `presence`,
 features and statistics. Retain dataset/subject/session split provenance, model
 training history, licenses and SHA-256 digests. Neither this fix nor synthetic
 tests resolve trained pose accuracy or independent hardware validation.
+
+
+## Recorded-link admission
+
+The model consumes all nine receiver/transmitter positions (`00` through `22`).
+The raw recorder may still retain a partial capture for diagnosis. During sample
+building, absent links are now masked as missing, with zero placeholders retained
+only to keep the tensor shape. Every window in such a partial capture is invalid;
+it cannot silently become a nine-link training example. `/meta`'s `build.links`
+records the present and missing keys. Training/validation aggregation fails
+clearly when no `valid & label_ok` rows remain, before fitting normalization.
+
+Build controls require a positive integer block size, finite positive anchor
+rate/clock-fit window and a nonnegative integer gap limit. These controls are
+checked before opening the file. Raw link keys, integer packet field shapes, row
+counts, float16-representable finite features, clock support and anchor alignment
+are checked before a forced rebuild replaces prior derived groups.
+Replacement grid/sample groups are then computed under a temporary HDF5 group,
+while the previous public groups and build metadata remain untouched. Publication
+uses HDF5 hard links, retaining previous objects without copying the full session.
+Ordinary computation or link/flush failures restore previous groups and metadata.
+If rollback itself fails, the error names the retained temporary `previous` group;
+those backup links are not deleted. Successful builds remove temporary links. Staging requires room for the new
+derived data alongside the old result until publication; it does not duplicate
+the raw capture. HDF5 may retain freed space in the container.
+This is ordinary-error recovery, not crash/power-loss atomicity or recovery from
+HDF5/storage corruption. Failed computation may change free-space bytes in the
+HDF5 container even though all existing datasets/attributes remain the same.
+
+`tests/test_sample_admission.py` exercises the actual recorder, alignment builder,
+teacher-result writer, PAM timestamp join and training loader on generated raw
+packets. It independently checks carrier/time/receiver/transmitter ordering,
+out-of-order video timestamp mapping and changed-link isolation. Missing-link,
+malformed-source and failed-preflight cases are separate from trained inference
+and physical board verification; no camera, MQTT connection or model download is
+started by these checks.
+
+
+Training split construction also rejects the same physical HDF5 file in both
+train and validation roles, including canonical-path, symlink and hard-link
+aliases, before statistics or training. Explicit evaluation of the training role
+remains available for diagnosis. Distinct files, including the documented
+nonoverlapping temporal split, remain supported. A filename or caller-supplied
+session string does not certify independent cohorts: copied contents and actual
+subject/session provenance still need independent review before quality claims.
