@@ -290,5 +290,5 @@ nazeeh111
 
 수정 모델은 원저자 표기 없이 사용 및 재브랜딩할 수 있는 허가를 받아 사용합니다.
 파이프라인의 [MIT 라이선스](LICENSE), [추가 구현](LICENSE-branding),
-[별도 구성요소 라이선스](THIRD_PARTY_NOTICES.md)의 범위는 구분됩니다.
+[잔차 블록 라이선스](third_party/pytorch-tutorial-LICENSE)의 범위는 구분됩니다.
 teacher 모델은 Apache-2.0 조건을 유지하며 별도로 다운로드됩니다.

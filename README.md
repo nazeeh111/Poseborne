@@ -65,7 +65,7 @@ Existing output paths are refused; use `--out another-directory` for another run
 
 <img src="figures/fall-demo.gif" alt="Original research recording: estimated 18-joint 2D pose with an experimental fall-state overlay" width="600">
 
-**Source-reported recording from the retained research implementation.** [Source and license scope](NOTICE.md) · [Setup and reported results →](docs/REFERENCE.md#what-it-detects)
+**Source-reported recording from the retained research implementation.** [Setup and reported results →](docs/REFERENCE.md#what-it-detects)
 
 ## Replay your recorded session
 
@@ -91,6 +91,6 @@ For new recordings, follow the [hardware and training guide](docs/REFERENCE.md#g
 
 ## Source and licensing
 
-The adapted model is used with permission to use and rebrand without author credit. [License scope](NOTICE.md) separates that permission from the pipeline, helper and dependency licenses. CLI, verification and the reproducible signal walkthrough are maintained by [nazeeh111](https://github.com/nazeeh111).
+The adapted model is used with permission to use and rebrand without author credit. The pipeline and residual helper retain their separate MIT licenses. CLI, verification and the reproducible signal walkthrough are maintained by [nazeeh111](https://github.com/nazeeh111).
 
-[Original license](LICENSE) · [New additions](LICENSE-branding) · [Third-party model notices](THIRD_PARTY_NOTICES.md)
+[Original license](LICENSE) · [New additions](LICENSE-branding) · [Residual helper license](third_party/pytorch-tutorial-LICENSE). Teacher labeling downloads Apache-2.0 RTMDet/RTMPose models separately.

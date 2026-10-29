@@ -323,6 +323,6 @@ Note: code comments and CLI help strings are written in Korean. "설계 §N" /
 ## Licenses
 
 The adapted model is used with permission to use and rebrand without author credit.
-See [component license terms](../THIRD_PARTY_NOTICES.md), the [pipeline MIT license](../LICENSE)
+See [residual helper license](../third_party/pytorch-tutorial-LICENSE), the [pipeline MIT license](../LICENSE)
 and [first-party additions](../LICENSE-branding). Teacher models retain Apache-2.0 terms
 and are downloaded separately.

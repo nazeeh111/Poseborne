@@ -1,7 +1,7 @@
 """Poseborne CSI-to-PAM regression network.
 
 Adapted model code is used with permission to use and rebrand without author credit.
-See THIRD_PARTY_NOTICES.md for the separate residual-helper MIT notice.
+See third_party/pytorch-tutorial-LICENSE for the residual-helper MIT terms.
 
 The existing WiSPPN class name and checkpoint contract remain compatible.
 
